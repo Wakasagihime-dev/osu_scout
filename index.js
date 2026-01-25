@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // initial data fetch
   fetchDB().then((data) => {
     const descAscVal = sortDescAsc.getAttribute("data-desc");
-    sortMaps(sortSelect, data, descAscVal);
+    sortMaps("last_updated", data, "desc");
     pages = parseUserSearch(
       searchBox.value.trim().toLowerCase(),
       data,
@@ -60,12 +60,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const descAscVal = sortDescAsc.getAttribute("data-desc");
       fetchDB().then((data) => {
         if (!ev.target.value.trim()) {
-          sortMaps(sortSelect, data, descAscVal);
+          sortMaps(sortSelect.value, data, descAscVal);
           pages = createPagesArray(data, pageSize);
           renderPage(pages, 1);
           return;
         }
-        sortMaps(sortSelect, data, descAscVal);
+        sortMaps(sortSelect.value, data, descAscVal);
         pages = parseUserSearch(
           ev.target.value.trim().toLowerCase(),
           data,
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
   sortSelect.addEventListener("change", () => {
     const descAscVal = sortDescAsc.getAttribute("data-desc");
     const data = pages.flat();
-    sortMaps(sortSelect, data, descAscVal);
+    sortMaps(sortSelect.value, data, descAscVal);
     pages = createPagesArray(data, pageSize);
     renderPage(pages, 1);
   });
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // update the data
     const data = pages.flat();
-    sortMaps(sortSelect, data, sortDescAsc.getAttribute("data-desc"));
+    sortMaps(sortSelect.value, data, sortDescAsc.getAttribute("data-desc"));
     pages = createPagesArray(data, pageSize);
     renderPage(pages, 1);
   });
@@ -119,9 +119,9 @@ async function fetchDB() {
   );
   return data.flat();
 }
-function sortMaps(sortSelect, data, descAsc) {
+function sortMaps(sortSelectVal, data, descAsc) {
   const multiplier = descAsc === "desc" ? 1 : -1;
-  if (sortSelect.value === "last_updated") {
+  if (sortSelectVal === "last_updated") {
     data.sort(
       (a, b) =>
         multiplier * (new Date(b.last_updated) - new Date(a.last_updated)),
