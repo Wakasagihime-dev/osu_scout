@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
       createPagesArray(data, pageSize),
       pageSize,
     );
+    console.log(pages[0]);
     renderPage(pages, pageNumber);
   });
   // going back a page CLICK EVENT
@@ -62,7 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!ev.target.value.trim()) {
           sortMaps(sortSelect, data, descAscVal);
           pages = createPagesArray(data, pageSize);
-          renderPage(pages, 1);
+          pageNumber = 1;
+          renderPage(pages, pageNumber);
           return;
         }
         sortMaps(sortSelect, data, descAscVal);
@@ -73,7 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
           pageSize,
         );
         if (pages.length) {
-          renderPage(pages, 1);
+          pageNumber = 1;
+          renderPage(pages, pageNumber);
         } else {
           document.querySelector(".beatmap-container").innerHTML =
             "Wow such empty...";
@@ -88,7 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = pages.flat();
     sortMaps(sortSelect, data, descAscVal);
     pages = createPagesArray(data, pageSize);
-    renderPage(pages, 1);
+    pageNumber = 1;
+    renderPage(pages, pageNumber);
   });
   // Click event on SORT ASC/DESC label
   sortDescAsc.addEventListener("click", (ev) => {
@@ -107,11 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = pages.flat();
     sortMaps(sortSelect, data, sortDescAsc.getAttribute("data-desc"));
     pages = createPagesArray(data, pageSize);
-    renderPage(pages, 1);
+    pageNumber = 1;
+    renderPage(pages, pageNumber);
   });
 });
 
 // UTILITY FUNCTIONS
+
+// fetch
 async function fetchDB() {
   const files = await fetch("./db/info.json").then((r) => r.json());
   const data = await Promise.all(
@@ -119,12 +126,15 @@ async function fetchDB() {
   );
   return data.flat();
 }
+// sort
 function sortMaps(sortSelect, data, descAsc) {
   const multiplier = descAsc === "desc" ? 1 : -1;
   if (sortSelect.value === "last_updated") {
     data.sort(
       (a, b) =>
-        multiplier * (new Date(b.last_updated) - new Date(a.last_updated)),
+        multiplier *
+        ((new Date(b.last_updated).getTime() || -Infinity) -
+          (new Date(a.last_updated).getTime() || -Infinity)),
     );
   } else if (sortSelect.value === "aim") {
     data.sort((a, b) => multiplier * (b.aim - a.aim));
@@ -134,6 +144,7 @@ function sortMaps(sortSelect, data, descAsc) {
     data.sort((a, b) => multiplier * (b.star_rating - a.star_rating));
   }
 }
+// user search
 function parseUserSearch(q, data, currPages, pageSize) {
   if (!q || typeof q !== "string") {
     return currPages;
@@ -188,6 +199,7 @@ function parseUserSearch(q, data, currPages, pageSize) {
   }
   return createPagesArray(filteredData, pageSize);
 }
+// filter/search results for text based properties like song title, map creator, artist, etc
 function filterByText(query, data, key) {
   let regexp;
   if (key === "title") {
