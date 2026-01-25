@@ -1,3 +1,4 @@
+**Link to the website:** [osu-scout](https://wakasagihime-dev.github.io/osu_scout/)
 Hello world!
 
 ![website preview](./assets/site-preview.png)
