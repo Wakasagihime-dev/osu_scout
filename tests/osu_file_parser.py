@@ -109,7 +109,7 @@ class Beatmap:
                     break
                 if ":" in line:
                     if "BeatmapID" in line:
-                        self.beatmapID = line.split(":")[1]
+                        self.beatmapID = int(line.split(":")[1])
                     if line.lower().split(":")[0] == "creator":
                         self.creator = line.split(":")[1]
                     elif line.lower().split(":")[0] == "title":
@@ -473,7 +473,7 @@ def calc_stream_stats(segments: list[list[HitObject]], cs: float) -> StreamStats
 ################### ---------------------- END OF STAT CALCULATORS -------------------###############################
 
 
-def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: str = "", tags: str = "", last_updated : str = "", lazer: bool = False):
+def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: str = "", tags: str = "", last_updated: str = "", lazer: bool = False):
     try:
         parsed_bm = Beatmap(fpath, tags=tags)
         parse_res = parsed_bm.parse()

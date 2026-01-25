@@ -1,11 +1,12 @@
 **Link to the website:** [osu-scout](https://wakasagihime-dev.github.io/osu_scout/)
-Hello world!
+
+**Hello world!**
 
 ![website preview](./assets/site-preview.png)
 ![website preview](./assets/preview-2.png)
 
 **What is this? Why did you make it?**  
-This website is a search tool that should hopefully allow you to easily find the _type_ of maps that you are looking for. Search is based on numerical and textual stats that I calculated and collected for the newest ranked maps that show up in the [osu! beatmap listing](https://osu.ppy.sh/beatmapsets). It is not intended to be a complete database of all ranked maps, only the newly ranked. Therefore, the database will be purged monthly and basically updated with the newest ranked maps of the next month.
+This website is a search tool that should hopefully allow you to easily find the _type_ of maps that you are looking for. Search is based on numerical and textual stats that I calculated and collected for the (almost) 51k maps I already have on lazer and for the newest ranked maps that show up in the [osu! beatmap listing](https://osu.ppy.sh/beatmapsets). It is not intended to be a complete database of all ranked maps, only maps I had on my PC and the newly ranked. Therefore, the database will be partially purged to keep its size constant while having constant updates with new maps if it grows too large for me to maintain.
 
 The aim stat is the one I care about the most. I created this simple stat by rewarding jump (1/2 rhythm) sections of songs and penalizing irregular rhythm sections and streams (anything not 1/2 gets penalty). Geometry/circle position is not taken into account which has its own implications and "bugs" but they are not significant enough for me to worry about. You could also use this as a stamina trainer because stream density and stream spacing are also calculated for each map. If you have ever used [sombrax](https://ost.sombrax79.org/) you'll know what these stats mean.
 
@@ -45,6 +46,6 @@ In general you can provide either a single value or a hyphen separated range of 
 
 **See all beatmaps:** To see the current list of all beatmaps simply completely empty the search field (backspace) and hit `Enter`.
 
-**PS:** This website is meant to host only the [newest mapsets](https://osu.ppy.sh/beatmapsets). I run a script daily to update this website so keep an eye out. Every month the entire database will be purged and I start updating daily again from scratch.
+**PS:** This website is meant to host only the [newest mapsets](https://osu.ppy.sh/beatmapsets). I run a script weekly to update this website so keep an eye out. Every month the entire database will be purged and I start updating weekly again from scratch.
 
 **Thank you for reading.** If you found this useful and want to say thanks or want to suggest something or want to criticize something [then hit me up on osu!](https://osu.ppy.sh/users/34763802)

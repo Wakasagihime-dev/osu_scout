@@ -17,6 +17,15 @@
       <div class="logo">osu-scout</div>
       <div class="search">
         <input type="search" id="search-box" />
+        <div class="sort">
+          <label for="sort" data-desc="desc">(Desc.)</label>
+          <select name="sort" id="sort">
+            <option value="last_updated" selected>Last Updated</option>
+            <option value="aim">Aim</option>
+            <option value="bpm">BPM</option>
+            <option value="star_rating">Star Rating</option>
+          </select>
+        </div>
       </div>
     </nav>
     <div class="info-wrapper">
@@ -132,9 +141,7 @@
           This website is meant to host only the
           <a target="_blank" href="https://osu.ppy.sh/beatmapsets"
             >newest mapsets.</a
-          >. I run a script daily to update this website so keep an eye out.
-          Every month the entire database will be purged and I start updating
-          daily again from scratch.
+          >. I run a script weekly to update this website so keep an eye out.
         </div>
         <div>
           <strong>What is this? Why did you make it?</strong>
@@ -142,8 +149,10 @@
           This is a website that allows you to search maps based on some stats
           that I calculated for the newest ranked maps that show up in the osu!
           website. It is not intended to be a complete database of all ranked
-          maps, only the newly ranked. Therefore, the database will be purged
-          monthly.
+          maps, only some 51k maps I had on lazer on my PC and newly ranked
+          maps. Therefore, the database will be partially purged to keep its
+          size constant while being updated with new maps if it grows too large
+          for me to maintain.
           <br />
           The aim stat is the one I care about the most. I created this simple
           stat by rewarding jump (1/2 rhythm) sections of songs and penalizing

@@ -1,8 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // DEFINE ELEMENTS
   const searchBox = document.getElementById("search-box");
-  searchBox.value = `tags="japanese" aim=75-95 star_rating=4.5-6 bpm=140-175`;
+  searchBox.value = `aim=75 star_rating=4 bpm=140-190`;
   const infoHideBtn = document.getElementById("hide-me");
   const info = document.querySelector("div.info");
+  const pgNrSpan = document.getElementById("page-nr");
+  const prev = document.getElementById("prev");
+  const next = document.getElementById("next");
+  const sortSelect = document.getElementById("sort");
+  const sortDescAsc = document.querySelector("div.sort label");
+  // Hide and show info
   infoHideBtn.addEventListener("click", (ev) => {
     if (infoHideBtn.textContent.trim() === "hide me") {
       info.style.display = "none";
@@ -12,23 +19,24 @@ document.addEventListener("DOMContentLoaded", () => {
       infoHideBtn.textContent = "hide me";
     }
   });
-  let pages = [];
-  const pageSize = 6;
-  const pgNrSpan = document.getElementById("page-nr");
-  let pageNumber = 1;
+  // Pages in memory
+  let pages = []; // array of arrays each inner array has objects
+  const pageSize = 6; // a single array would have 6 objects
+  let pageNumber = 1; // page number
   pgNrSpan.innerText = pageNumber;
+  // initial data fetch
   fetchDB().then((data) => {
-    data.sort((a, b) => b.aim - a.aim);
+    const descAscVal = sortDescAsc.getAttribute("data-desc");
+    sortMaps(sortSelect, data, descAscVal);
     pages = parseUserSearch(
-      `tags="japanese" aim=75-95 star_rating=4.5-6 bpm=140-175`,
+      searchBox.value.trim().toLowerCase(),
       data,
       createPagesArray(data, pageSize),
       pageSize,
     );
     renderPage(pages, pageNumber);
   });
-  const prev = document.getElementById("prev");
-  const next = document.getElementById("next");
+  // going back a page CLICK EVENT
   prev.addEventListener("click", (ev) => {
     if (pages.length <= 1 || pageNumber === 1) {
       ev.preventDefault();
@@ -37,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPage(pages, pageNumber - 1);
     pageNumber -= 1;
   });
+  // going to the next page CLICK EVENT
   next.addEventListener("click", (ev) => {
     if (pages.length <= 1 || pageNumber === pages.length) {
       ev.preventDefault();
@@ -45,16 +54,18 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPage(pages, pageNumber + 1);
     pageNumber += 1;
   });
+  // search keyup "ENTER" event
   searchBox.addEventListener("keyup", (ev) => {
     if (ev.key == "Enter") {
+      const descAscVal = sortDescAsc.getAttribute("data-desc");
       fetchDB().then((data) => {
         if (!ev.target.value.trim()) {
-          data.sort((a, b) => b.aim - a.aim);
+          sortMaps(sortSelect, data, descAscVal);
           pages = createPagesArray(data, pageSize);
           renderPage(pages, 1);
           return;
         }
-        data.sort((a, b) => b.aim - a.aim);
+        sortMaps(sortSelect, data, descAscVal);
         pages = parseUserSearch(
           ev.target.value.trim().toLowerCase(),
           data,
@@ -71,6 +82,33 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+  // SORT SELECT val on change
+  sortSelect.addEventListener("change", () => {
+    const descAscVal = sortDescAsc.getAttribute("data-desc");
+    const data = pages.flat();
+    sortMaps(sortSelect, data, descAscVal);
+    pages = createPagesArray(data, pageSize);
+    renderPage(pages, 1);
+  });
+  // Click event on SORT ASC/DESC label
+  sortDescAsc.addEventListener("click", (ev) => {
+    const descText = "(Desc.)";
+    const ascText = "(Asc.)";
+    const currVal = ev.target.innerHTML.trim();
+    // read and update label for desc/asc
+    if (currVal === descText) {
+      sortDescAsc.innerHTML = ascText;
+      sortDescAsc.setAttribute("data-desc", "asc");
+    } else if (currVal === ascText) {
+      sortDescAsc.innerHTML = descText;
+      sortDescAsc.setAttribute("data-desc", "desc");
+    }
+    // update the data
+    const data = pages.flat();
+    sortMaps(sortSelect, data, sortDescAsc.getAttribute("data-desc"));
+    pages = createPagesArray(data, pageSize);
+    renderPage(pages, 1);
+  });
 });
 
 // UTILITY FUNCTIONS
@@ -80,6 +118,21 @@ async function fetchDB() {
     files.map((f) => fetch(f).then((r) => r.json())),
   );
   return data.flat();
+}
+function sortMaps(sortSelect, data, descAsc) {
+  const multiplier = descAsc === "desc" ? 1 : -1;
+  if (sortSelect.value === "last_updated") {
+    data.sort(
+      (a, b) =>
+        multiplier * (new Date(b.last_updated) - new Date(a.last_updated)),
+    );
+  } else if (sortSelect.value === "aim") {
+    data.sort((a, b) => multiplier * (b.aim - a.aim));
+  } else if (sortSelect.value === "bpm") {
+    data.sort((a, b) => multiplier * (b.bpm - a.bpm));
+  } else if (sortSelect.value === "star_rating") {
+    data.sort((a, b) => multiplier * (b.star_rating - a.star_rating));
+  }
 }
 function parseUserSearch(q, data, currPages, pageSize) {
   if (!q || typeof q !== "string") {
@@ -101,7 +154,12 @@ function parseUserSearch(q, data, currPages, pageSize) {
   const filters = q
     .split(" ")
     .filter(
-      (a) => a.includes("=") && !a.includes("title=") && !a.includes("tags="),
+      (a) =>
+        a.includes("=") &&
+        !a.includes("title=") &&
+        !a.includes("tags=") &&
+        !a.includes("creator=") &&
+        !a.includes("artist="),
     );
   for (let i = 0; i < filters.length; i++) {
     const filter = filters[i];
