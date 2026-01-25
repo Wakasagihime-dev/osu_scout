@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
       createPagesArray(data, pageSize),
       pageSize,
     );
-    console.log(pages[0]);
     renderPage(pages, pageNumber);
   });
   // going back a page CLICK EVENT
