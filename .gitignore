@@ -1,0 +1,6 @@
+tests/*.json
+tests/.env
+.venv
+**/*.env
+__pycache__
+tests/osu-files

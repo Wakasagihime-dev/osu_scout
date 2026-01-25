@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <link
+      rel="shortcut icon"
+      href="assets/osu-logo-2007.ico"
+      type="image/x-icon"
+    />
+    <script src="index.js"></script>
+    <title>osu-scout</title>
+  </head>
+  <body>
+    <nav>
+      <div class="logo">osu-scout</div>
+      <div class="search">
+        <input type="search" id="search-box" />
+      </div>
+    </nav>
+    <div class="info-wrapper">
+      <div
+        id="hide-me"
+        style="
+          font-size: small;
+          color: #eee;
+          background-color: #ee6da7;
+          padding: 2px;
+          border-radius: 2px;
+          margin-bottom: 0px;
+          width: fit-content;
+          cursor: pointer;
+        "
+      >
+        show me
+      </div>
+      <div class="info" style="display: none">
+        <div>Hello world!</div>
+        <br />
+        <div>
+          <strong> Text search example (text-type query): </strong>
+          <code>
+            creator="akitoshi" artist="kawada mimi fripside" tags="japanese
+            anime"
+          </code>
+          <br />
+          <br />
+          <strong>Explanation: </strong>
+          Well, this is really simple. Please keep in mind to hit enter for the
+          search results to come. The only thing I have to mention is that I did
+          not put too much effort in the code because I am not too bothered. So
+          you will get maps with songs sung by kawada, mimi, and fripside (for
+          those who don't get the issue with this kawada mimi is one artist, not
+          two separate artists kawada and mimi). Another example, if you write:
+          <br />
+          <br />
+          <code> artist="imperial circus dead decadance" </code>
+          <br />
+          <br />
+          you will get maps of songs sung by ICDD and also sung by this band for
+          example: "Girls Dead Monster STARRING LiSA" because both contain the
+          word dead. Not a bug, a feature.
+          <br />
+          <strong>IMPORTANT: </strong>you must include the quotes ("") when
+          doing text based search!
+          <br />
+          <strong>Note: </strong>you can of course combine this with number-type
+          stat search query. Number stats are explained below.
+        </div>
+        <br />
+        <div>
+          <strong>Number stats search example (number-type query): </strong>
+          <code> aim=75 star_rating=4-4.5 bpm=150-180 ar=9 </code>
+          <br />
+          <br />
+          <strong>Explanation: </strong>
+          <code>aim=75</code> means that you will get maps scoring more than 75%
+          on aim stat (a stat that I made to calculate how likely the map is to
+          be a comfy aim map). Interpret it as a percentage (0% burst heavy map
+          to 100% is aim centered map). This value can exceed 100. I know
+          percentages do not but it was my decision to reward certain parts of
+          maps to distinguish them as "aim heavy", think of the value on top of
+          the 100% as a bonus to the stat. Keep in mind you can either do
+          something like <code>aim=82</code> or <code>aim=85-96</code> which
+          defines minimum or both minimum and maximum respectively. You cannot
+          define a maximum alone! This goes for all number-type stats (see list
+          of all of them below in usage)!
+          <br />
+          <br />
+          <code>star_rating=4-4.5</code> means that you will get maps that are
+          greater than or equal to 4* in difficulty and less or equal to 4.5* in
+          difficulty.
+          <br />
+          <br />
+          <code>bpm=150-180</code> you can take a guess. Maps between 150 BPM
+          and 180 BPM.
+          <br />
+          <br />
+          <code>ar=9</code> means that the minimum approach rate in the maps you
+          get will be 9.
+          <br />
+          <br />
+          In general you can provide either a single value or a hyphen separated
+          range of min and max values (inclusive).
+        </div>
+        <br />
+        <div>
+          <strong>Usage: </strong>
+          The following search keywords are to be used:
+          <ul>
+            <li>aim</li>
+            <li>stream-density</li>
+            <li>stream-spacing</li>
+            <li>ar</li>
+            <li>bpm</li>
+            <li>star_rating</li>
+            <li>pp_100</li>
+            <li>pp_95</li>
+            <li>max_combo</li>
+          </ul>
+        </div>
+        <br />
+        <div>
+          <strong>See all beatmaps: </strong>
+          To see the current list of all beatmaps simply empty the search field
+          (backspace) and hit <code>Enter</code>.
+        </div>
+        <br />
+        <div>
+          <strong>PS: </strong>
+          This website is meant to host only the
+          <a target="_blank" href="https://osu.ppy.sh/beatmapsets"
+            >newest mapsets.</a
+          >. I run a script daily to update this website so keep an eye out.
+          Every month the entire database will be purged and I start updating
+          daily again from scratch.
+        </div>
+        <div>
+          <strong>What is this? Why did you make it?</strong>
+          <br />
+          This is a website that allows you to search maps based on some stats
+          that I calculated for the newest ranked maps that show up in the osu!
+          website. It is not intended to be a complete database of all ranked
+          maps, only the newly ranked. Therefore, the database will be purged
+          monthly.
+          <br />
+          The aim stat is the one I care about the most. I created this simple
+          stat by rewarding jump (1/2 rhythm) sections of songs and penalizing
+          irregular rhythm sections and streams (anything not 1/2 gets penalty).
+          Geometry/circle position is not taken into account which has its own
+          implications and "bugs" but they are not significant enough for me to
+          worry about. You could also use this as a stamina trainer because
+          stream density and stream spacing are also calculated for each map. If
+          you have ever used
+          <a href="https://ost.sombrax79.org/" target="_blank">sombrax</a>
+          you'll know what these stats mean.
+        </div>
+        <br />
+        <div>
+          <strong>Thank you for reading. </strong>
+          If you found this useful and want to say thanks or want suggest
+          something or want to criticize something
+          <a href="https://osu.ppy.sh/users/34763802" target="_blank"
+            >then hit me up on osu!</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="beatmap-container"></div>
+    <footer>
+      <span id="prev">&leftarrow; </span>
+      <span id="page-nr"></span>
+      <span id="next"> &rightarrow;</span>
+      <div>osu-scout</div>
+    </footer>
+  </body>
+</html>

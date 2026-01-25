@@ -1,0 +1,157 @@
+/* === reset === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background-color: #222;
+  color: #ccc;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  line-height: 1.4;
+  background: #fafafa;
+}
+/* === nav === */
+nav,
+nav > * {
+  background-color: #111;
+}
+nav {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+div.logo {
+  padding: 7px;
+  border-radius: 10px;
+  color: #eee;
+  border: 2px solid #eee;
+  background-color: #ee6da7;
+}
+div.search {
+  width: 50%;
+}
+input[type="search"] {
+  outline: none;
+  border: 2px solid #333;
+  font-size: 16px;
+  padding: 2px;
+  width: 100%;
+}
+/* === info === */
+div.info-wrapper {
+  padding: 30px;
+}
+div.info {
+  border: 2px solid #ccc;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 35px;
+}
+div.info a {
+  color: #ee6da7;
+}
+div.info > div strong {
+  color: yellow;
+}
+div.info > div code {
+  color: #ee6da7;
+  padding: 5px;
+  border: 1px solid #ccc;
+  background-color: #111;
+}
+div.info ul {
+  padding: 10px;
+}
+/* === layout === */
+.beatmap-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* === card === */
+.beatmap-card {
+  width: 400px;
+  border: 2px solid #777;
+  border-radius: 5px;
+}
+
+/* fixed image size */
+.beatmap-card img {
+  width: 100%;
+  height: 140px; /* hardcoded height */
+  object-fit: cover; /* crop, no stretching */
+  display: block;
+  border-radius: 2px;
+}
+
+/* === stats === */
+.stats {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.stats > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stats span:first-child {
+  color: #555;
+}
+/* === card footer === */
+.map-link {
+  text-align: center;
+  padding: 10px;
+}
+.map-link a {
+  color: #ee6da7;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+/* === page footer === */
+footer {
+  font-size: 24px;
+  width: 100%;
+  text-align: center;
+  user-select: none;
+}
+#prev,
+#next {
+  cursor: pointer;
+}
+#prev:hover,
+#next:hover {
+  color: #ee6da7;
+}
+footer div {
+  padding: 20px 50px;
+  text-align: center;
+  background-color: #ee6da7;
+  margin-top: 50px;
+  color: #eee;
+  user-select: none;
+}
