@@ -1,7 +1,7 @@
 Hello world!
 
-![website preview](./web/assets/site-preview.png)
-![website preview](./web/assets/preview-2.png)
+![website preview](./assets/site-preview.png)
+![website preview](./assets/preview-2.png)
 
 **What is this? Why did you make it?**  
 This website is a search tool that should hopefully allow you to easily find the _type_ of maps that you are looking for. Search is based on numerical and textual stats that I calculated and collected for the newest ranked maps that show up in the [osu! beatmap listing](https://osu.ppy.sh/beatmapsets). It is not intended to be a complete database of all ranked maps, only the newly ranked. Therefore, the database will be purged monthly and basically updated with the newest ranked maps of the next month.
