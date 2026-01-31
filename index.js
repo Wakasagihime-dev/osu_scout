@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // fetch
 async function fetchDB() {
-  const files = await fetch("./db/info.json").then((r) => r.json());
+  const files = await fetch("./db/info-2026-01-31.json").then((r) => r.json());
   const data = await Promise.all(
     files.map((f) => fetch(f).then((r) => r.json())),
   );
