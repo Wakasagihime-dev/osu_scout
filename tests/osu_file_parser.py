@@ -473,7 +473,7 @@ def calc_stream_stats(segments: list[list[HitObject]], cs: float) -> StreamStats
 ################### ---------------------- END OF STAT CALCULATORS -------------------###############################
 
 
-def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: str = "", tags: str = "", last_updated: str = "", lazer: bool = False):
+def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: str = "", tags: str = "", date_ranked: str = "", lazer: bool = False):
     try:
         parsed_bm = Beatmap(fpath, tags=tags)
         parse_res = parsed_bm.parse()
@@ -518,7 +518,7 @@ def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: st
                 "max_combo": max_combo,
                 "bg_url": bg_url,
                 "url": url,
-                "last_updated": last_updated
+                "date_ranked": date_ranked
             }
     except Exception as e:
         return f"ERROR: {e} -- {fpath}"

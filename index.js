@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // DEFINE ELEMENTS
   const searchBox = document.getElementById("search-box");
-  searchBox.value = `aim=75 star_rating=4 bpm=140-190`;
+  searchBox.value = `aim=80-95 star_rating=4 bpm=140-190 ranked=2026-01-01`;
   const infoHideBtn = document.getElementById("hide-me");
   const info = document.querySelector("div.info");
   const pgNrSpan = document.getElementById("page-nr");
@@ -128,12 +128,12 @@ async function fetchDB() {
 // sort
 function sortMaps(sortSelect, data, descAsc) {
   const multiplier = descAsc === "desc" ? 1 : -1;
-  if (sortSelect.value === "last_updated") {
+  if (sortSelect.value === "date_ranked") {
     data.sort(
       (a, b) =>
         multiplier *
-        ((new Date(b.last_updated).getTime() || -Infinity) -
-          (new Date(a.last_updated).getTime() || -Infinity)),
+        ((new Date(b.date_ranked).getTime() || -Infinity) -
+          (new Date(a.date_ranked).getTime() || -Infinity)),
     );
   } else if (sortSelect.value === "aim") {
     data.sort((a, b) => multiplier * (b.aim - a.aim));
@@ -149,6 +149,7 @@ function parseUserSearch(q, data, currPages, pageSize) {
     return currPages;
   }
   let filteredData = data;
+  // this section has text filters
   if (q.includes("title=")) {
     filteredData = filterByText(q, filteredData, "title");
   }
@@ -161,6 +162,14 @@ function parseUserSearch(q, data, currPages, pageSize) {
   if (q.includes("artist=")) {
     filteredData = filterByText(q, filteredData, "artist");
   }
+  // this section has date filtering
+  if (q.includes("ranked=")) {
+    const qtime = new Date(q.split("ranked=")[1].split(" ")[0]).getTime();
+    filteredData = filteredData.filter((b) => {
+      return new Date(b.date_ranked).getTime() > qtime;
+    });
+  }
+  // exclude text filters since they are done
   const filters = q
     .split(" ")
     .filter(
@@ -169,8 +178,10 @@ function parseUserSearch(q, data, currPages, pageSize) {
         !a.includes("title=") &&
         !a.includes("tags=") &&
         !a.includes("creator=") &&
-        !a.includes("artist="),
+        !a.includes("artist=") &&
+        !a.includes("ranked="),
     );
+  // this section has numerical filtering
   for (let i = 0; i < filters.length; i++) {
     const filter = filters[i];
     const key = filter.split("=")[0];
