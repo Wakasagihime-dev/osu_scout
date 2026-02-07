@@ -6,7 +6,7 @@
 ![website preview](./assets/preview-2.png)
 
 **What is this? Why did you make it?**  
-This website is a search tool that should hopefully allow you to easily find the _type_ of maps that you are looking for. Search is based on numerical and textual stats that I calculated and collected for all ranked osu! maps until 01/01/2026.
+This website is a search tool that should hopefully allow you to easily find the type of maps that you are looking for. Search is based on numerical and textual stats that I calculated and collected for all ranked osu! maps until 01/01/2026.
 
 **Available data**
 
