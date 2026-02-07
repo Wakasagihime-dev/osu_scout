@@ -1,7 +1,10 @@
+let numGroups = 0;
+const defaultSearch = `aim=80-95 star_rating=4 bpm=140-190`;
 document.addEventListener("DOMContentLoaded", () => {
   // DEFINE ELEMENTS
+  const bmContainer = document.querySelector(".beatmap-container");
   const searchBox = document.getElementById("search-box");
-  searchBox.value = `aim=80-95 star_rating=4 bpm=140-190 ranked=2026-01-01`;
+  searchBox.value = defaultSearch;
   const infoHideBtn = document.getElementById("hide-me");
   const info = document.querySelector("div.info");
   const pgNrSpan = document.getElementById("page-nr");
@@ -9,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const next = document.getElementById("next");
   const sortSelect = document.getElementById("sort");
   const sortDescAsc = document.querySelector("div.sort label");
+  const prevDset = document.getElementById("prev-dataset");
+  const nextDset = document.getElementById("next-dataset");
+  const currDset = document.getElementById("dataset-val");
   // Hide and show info
   infoHideBtn.addEventListener("click", (ev) => {
     if (infoHideBtn.textContent.trim() === "hide me") {
@@ -19,13 +25,24 @@ document.addEventListener("DOMContentLoaded", () => {
       infoHideBtn.textContent = "hide me";
     }
   });
-  // Pages in memory
+  // INITIAL SETUP/VALUES and loading Pages in memory
   let pages = []; // array of arrays each inner array has objects
   const pageSize = 6; // a single array would have 6 objects
   let pageNumber = 1; // page number
-  pgNrSpan.innerText = pageNumber;
+  localStorage.setItem("group", "0");
+  pgNrSpan.innerHTML = "Loading...";
   // initial data fetch
+  // // decode URI search params if necessary
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("q");
+  const decoded = decodeURIComponent(q);
+  if (q) {
+    searchBox.value = decoded;
+  } else {
+    searchBox.value = defaultSearch;
+  }
   fetchDB().then((data) => {
+    pgNrSpan.innerHTML = "Loading...";
     const descAscVal = sortDescAsc.getAttribute("data-desc");
     sortMaps(sortSelect, data, descAscVal);
     pages = parseUserSearch(
@@ -34,7 +51,60 @@ document.addEventListener("DOMContentLoaded", () => {
       createPagesArray(data, pageSize),
       pageSize,
     );
+    currDset.innerHTML = `${(((0 % numGroups) + numGroups) % numGroups) + 1} out of ${numGroups} datasets.`;
+    if (pages.length == 0) {
+      pgNrSpan.innerHTML = "Wow such empty...";
+      return;
+    }
     renderPage(pages, pageNumber);
+  });
+  // // PREV change dataset
+  prevDset.addEventListener("click", () => {
+    const grp = parseInt(localStorage.getItem("group"));
+    bmContainer.innerHTML = "";
+    pgNrSpan.innerHTML = "Loading...";
+    fetchDB(grp - 1).then((data) => {
+      pageNumber = 1;
+      const descAscVal = sortDescAsc.getAttribute("data-desc");
+      sortMaps(sortSelect, data, descAscVal);
+      pages = parseUserSearch(
+        searchBox.value.trim().toLowerCase(),
+        data,
+        createPagesArray(data, pageSize),
+        pageSize,
+      );
+      localStorage.setItem("group", `${grp - 1}`);
+      currDset.innerHTML = `${((((grp - 1) % numGroups) + numGroups) % numGroups) + 1} out of ${numGroups} datasets.`;
+      if (pages.length == 0) {
+        pgNrSpan.innerHTML = "Wow such empty...";
+        return;
+      }
+      renderPage(pages, pageNumber);
+    });
+  });
+  // // NEXT change dataset
+  nextDset.addEventListener("click", () => {
+    pageNumber = 1;
+    const grp = parseInt(localStorage.getItem("group"));
+    bmContainer.innerHTML = "";
+    pgNrSpan.innerHTML = "Loading...";
+    fetchDB(grp + 1).then((data) => {
+      const descAscVal = sortDescAsc.getAttribute("data-desc");
+      sortMaps(sortSelect, data, descAscVal);
+      pages = parseUserSearch(
+        searchBox.value.trim().toLowerCase(),
+        data,
+        createPagesArray(data, pageSize),
+        pageSize,
+      );
+      localStorage.setItem("group", `${grp + 1}`);
+      currDset.innerHTML = `${((((grp + 1) % numGroups) + numGroups) % numGroups) + 1} out of ${numGroups} datasets.`;
+      if (pages.length == 0) {
+        pgNrSpan.innerHTML = "Wow such empty...";
+        return;
+      }
+      renderPage(pages, pageNumber);
+    });
   });
   // going back a page CLICK EVENT
   prev.addEventListener("click", (ev) => {
@@ -58,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
   searchBox.addEventListener("keyup", (ev) => {
     if (ev.key == "Enter") {
       const descAscVal = sortDescAsc.getAttribute("data-desc");
-      fetchDB().then((data) => {
+      fetchDB(parseInt(localStorage.getItem("group"))).then((data) => {
         if (!ev.target.value.trim()) {
           sortMaps(sortSelect, data, descAscVal);
           pages = createPagesArray(data, pageSize);
@@ -73,6 +143,13 @@ document.addEventListener("DOMContentLoaded", () => {
           pages[pageNumber - 1],
           pageSize,
         );
+        // change address bar
+        history.replaceState(
+          null,
+          "",
+          `?q=${encodeURIComponent(ev.target.value.trim())}`,
+        );
+        // end change
         if (pages.length) {
           pageNumber = 1;
           renderPage(pages, pageNumber);
@@ -118,8 +195,13 @@ document.addEventListener("DOMContentLoaded", () => {
 // UTILITY FUNCTIONS
 
 // fetch
-async function fetchDB() {
-  const files = await fetch("./db/info-2026-01-31.json").then((r) => r.json());
+async function fetchDB(group = 0) {
+  const groups = await fetch("./db_2026_01_01/info.json").then((r) => r.json());
+  if (numGroups === 0) {
+    numGroups = groups.length;
+  }
+  const files =
+    groups[((group % groups.length) + groups.length) % groups.length];
   const data = await Promise.all(
     files.map((f) => fetch(f).then((r) => r.json())),
   );
@@ -129,12 +211,7 @@ async function fetchDB() {
 function sortMaps(sortSelect, data, descAsc) {
   const multiplier = descAsc === "desc" ? 1 : -1;
   if (sortSelect.value === "date_ranked") {
-    data.sort(
-      (a, b) =>
-        multiplier *
-        ((new Date(b.date_ranked).getTime() || -Infinity) -
-          (new Date(a.date_ranked).getTime() || -Infinity)),
-    );
+    data.sort((a, b) => multiplier * (b.id - a.id));
   } else if (sortSelect.value === "aim") {
     data.sort((a, b) => multiplier * (b.aim - a.aim));
   } else if (sortSelect.value === "bpm") {
@@ -161,13 +238,6 @@ function parseUserSearch(q, data, currPages, pageSize) {
   }
   if (q.includes("artist=")) {
     filteredData = filterByText(q, filteredData, "artist");
-  }
-  // this section has date filtering
-  if (q.includes("ranked=")) {
-    const qtime = new Date(q.split("ranked=")[1].split(" ")[0]).getTime();
-    filteredData = filteredData.filter((b) => {
-      return new Date(b.date_ranked).getTime() > qtime;
-    });
   }
   // exclude text filters since they are done
   const filters = q
@@ -266,7 +336,7 @@ function bmInnerHTMLTemplate(bmData) {
           />
         </div>
         <div class="stats">
-          <div><span>Aim:</span><span>${Number(bmData.aim).toFixed(2)}</span></div>
+          <div><span>Aim</span><span>${Number(bmData.aim).toFixed(2)}</span></div>
           <div><span>BPM</span><span>${Number(bmData.bpm).toFixed(2)}</span></div>
           <div><span>stream density</span><span>${Number(bmData["stream-density"]).toFixed(2)}</span></div>
           <div><span>stream spacing</span><span>${Number(bmData["stream-spacing"]).toFixed(2)}</span></div>
@@ -275,6 +345,7 @@ function bmInnerHTMLTemplate(bmData) {
           <div><span>100% PP</span><span>${Number(bmData.pp_100).toFixed(2)}</span></div>
           <div><span>95% PP</span><span>${Number(bmData.pp_95).toFixed(2)}</span></div>
           <div><span>Max combo</span><span>${bmData.max_combo}</span></div>
+          <div><span>Difficulty name</span><span>${bmData.version}</span></div>
         </div>
         <div class="map-link">
           <a href="${bmData.url}"

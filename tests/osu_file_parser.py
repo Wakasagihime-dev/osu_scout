@@ -1,7 +1,10 @@
+import os
 from typing import Literal
 import math
 import bisect
 import rosu_pp_py
+from urllib.parse import quote
+
 
 # utility functions
 
@@ -55,14 +58,16 @@ class Beatmap:
         self.bpm_changes: list[dict[float, tuple[float, int]]] = []
         self.hit_objects: list[HitObject] = []
         self.bpm_list: list[int] = []
-        self.beatmapID: str = ""
+        self.beatmapID: int = -1
         self.AR: float = 0.0
         self.dominant_bpm: int = 0
         self.title: str = ""
         self.creator: str = ""
         self.artist: str = ""
         self.star_rating = star_rating
-        self.tags = tags
+        self.tags: str = tags
+        self.version: str = ""
+        self.beatmapsetID: int = -1
 
     # tuple contains [beatLength,bpm]
     def get_dominant_bpm_change(self) -> dict[float, tuple[float, int]]:
@@ -116,6 +121,12 @@ class Beatmap:
                         self.title = line.split(":")[1]
                     elif line.lower().split(":")[0] == "artist":
                         self.artist = line.split(":")[1]
+                    elif line.lower().split(":")[0] == "tags":
+                        self.tags = line.split(":")[1]
+                    elif line.lower().split(":")[0] == "version":
+                        self.version = line.split(":")[1]
+                    elif line.lower().split(":")[0] == "beatmapsetid":
+                        self.beatmapsetID = int(line.split(":")[1])
             # loop to get SliderMultiplier and CircleSize from [Difficulty]
             for line in lines[difficulty_idx+1:]:
                 if not line:
@@ -473,9 +484,9 @@ def calc_stream_stats(segments: list[list[HitObject]], cs: float) -> StreamStats
 ################### ---------------------- END OF STAT CALCULATORS -------------------###############################
 
 
-def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: str = "", tags: str = "", date_ranked: str = "", lazer: bool = False):
+def create_stats_entry(fpath: str, lazer: bool = False):
     try:
-        parsed_bm = Beatmap(fpath, tags=tags)
+        parsed_bm = Beatmap(fpath)
         parse_res = parsed_bm.parse()
         if parse_res == "Mode is not osu!":
             raise Exception(parse_res)
@@ -500,6 +511,29 @@ def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: st
             else:
                 raise Exception("Suspicious map according to rosu.")
             # end
+            # if ID does not exist
+            url = f"https://osu.ppy.sh/beatmapsets/{parsed_bm.beatmapsetID}#osu/{parsed_bm.beatmapID}"
+            bg_url = f"https://assets.ppy.sh/beatmaps/{parsed_bm.beatmapsetID}/covers/cover.jpg"
+            # # check if ids are valid
+            invalid_id = False
+            if isinstance(parsed_bm.beatmapID, int):
+                if parsed_bm.beatmapID < 0:
+                    invalid_id = True
+            else:
+                invalid_id = True
+            if isinstance(parsed_bm.beatmapsetID, int):
+                if parsed_bm.beatmapsetID < 0:
+                    invalid_id = True
+            else:
+                invalid_id = True
+            # # end check
+            # # modify the urls if needed from check
+            if invalid_id:
+                enc = quote(
+                    f"title=\'\'\'{parsed_bm.title}\'\'\' creator=\'\'\'{parsed_bm.creator}\'\'\' artist=\'\'\'{parsed_bm.artist}\'\'\'")
+                url = f"https://osu.ppy.sh/beatmapsets?q={enc}"
+                bg_url = "assets/bg_placeholder.png"
+            # end
             return {
                 "aim": aim,
                 "stream-density": ss.density,
@@ -507,7 +541,7 @@ def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: st
                 "ar": parsed_bm.AR,
                 "bpm": parsed_bm.dominant_bpm,
                 "id": parsed_bm.beatmapID,
-                "beatmapset_id": beatmapset_id,
+                "beatmapset_id": parsed_bm.beatmapID,
                 "title": parsed_bm.title,
                 "artist": parsed_bm.artist,
                 "creator": parsed_bm.creator,
@@ -518,7 +552,8 @@ def create_stats_entry(fpath: str, beatmapset_id: int, bg_url: str = "", url: st
                 "max_combo": max_combo,
                 "bg_url": bg_url,
                 "url": url,
-                "date_ranked": date_ranked
+                "version": parsed_bm.version,
+                "_fpath": os.path.join(os.path.basename(os.path.dirname(fpath)), os.path.basename(fpath))
             }
     except Exception as e:
         return f"ERROR: {e} -- {fpath}"

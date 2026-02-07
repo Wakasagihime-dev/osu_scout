@@ -6,7 +6,13 @@
 ![website preview](./assets/preview-2.png)
 
 **What is this? Why did you make it?**  
-This website is a search tool that should hopefully allow you to easily find the _type_ of maps that you are looking for. Search is based on numerical and textual stats that I calculated and collected for the (almost) 51k maps I already have on lazer and for the newest ranked maps that show up in the [osu! beatmap listing](https://osu.ppy.sh/beatmapsets). It is not intended to be a complete database of all ranked maps, only maps I had on my PC and the newly ranked. Therefore, the database will be partially purged to keep its size constant while having constant updates with new maps if it grows too large for me to maintain.
+This website is a search tool that should hopefully allow you to easily find the _type_ of maps that you are looking for. Search is based on numerical and textual stats that I calculated and collected for all ranked osu! maps until 01/01/2026.
+
+**Available data**
+
+This website should contain **all** of the osu! standard **ranked** maps until first of January of 2026.
+
+**Discussion**
 
 The aim stat is the one I care about the most. I created this simple stat by rewarding jump (1/2 rhythm) sections of songs and penalizing irregular rhythm sections and streams (anything not 1/2 gets penalty). Geometry/circle position is not taken into account which has its own implications and "bugs" but they are not significant enough for me to worry about. You could also use this as a stamina trainer because stream density and stream spacing are also calculated for each map. If you have ever used [sombrax](https://ost.sombrax79.org/) you'll know what these stats mean.
 
@@ -46,6 +52,12 @@ In general you can provide either a single value or a hyphen separated range of 
 
 **See all beatmaps:** To see the current list of all beatmaps simply completely empty the search field (backspace) and hit `Enter`.
 
-**PS:** This website is meant to host only the [newest mapsets](https://osu.ppy.sh/beatmapsets). I run a script weekly to update this website so keep an eye out. Every month the entire database will be purged and I start updating weekly again from scratch.
+**PS missing beatmap IDs**
+
+Some `.osu` files have missing or broken beatmap and/or beatmapset IDs. I simply use a pippidon placeholder image as the cover image for the background to indicate that:
+
+![pippidon image cover as bg placeholder](./assets/bg_placeholder.png)
+
+The link will not directly send you to the map's actual URL (not possible due to broken ID) but instead into a query which should still help you to find the exact map you are looking for. E.g. url: https://osu.ppy.sh/beatmapsets?q=title%3D%27%27%27Okurina%20-Inochi%20o%20Aoku%20Mimamori%20Nemurina-%27%27%27%20creator%3D%27%27%27itswinter%27%27%27
 
 **Thank you for reading.** If you found this useful and want to say thanks or want to suggest something or want to criticize something [then hit me up on osu!](https://osu.ppy.sh/users/34763802)

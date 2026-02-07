@@ -96,9 +96,6 @@ div.info ul {
   gap: 16px;
   padding: 10px;
 }
-#loading {
-  font-size: 22px;
-}
 /* === card === */
 .beatmap-card {
   width: 400px;

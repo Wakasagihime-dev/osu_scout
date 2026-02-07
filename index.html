@@ -15,14 +15,21 @@
       <div class="search">
         <input type="search" id="search-box" />
         <div class="sort">
-          <label for="sort" data-desc="desc">(Desc.)</label>
+          <label for="sort" data-desc="asc">(Asc.)</label>
           <select name="sort" id="sort">
-            <option value="date_ranked" selected>Date Ranked</option>
+            <option value="date_ranked">Date Ranked</option>
             <option value="aim">Aim</option>
-            <option value="bpm">BPM</option>
+            <option value="bpm" selected>BPM</option>
             <option value="star_rating">Star Rating</option>
           </select>
         </div>
+        <button id="prev-dataset" style="padding: 5px">
+          Load prev dataset
+        </button>
+        <button id="next-dataset" style="padding: 5px">
+          Load next dataset
+        </button>
+        <div id="dataset-val" style="padding: 2px"></div>
       </div>
     </nav>
     <div class="info-wrapper">
@@ -134,22 +141,10 @@
         </div>
         <br />
         <div>
-          <strong>PS: </strong>
-          This website is meant to host only the
-          <a target="_blank" href="https://osu.ppy.sh/beatmapsets"
-            >newest mapsets.</a
-          >. I run a script weekly to update this website so keep an eye out.
-        </div>
-        <div>
           <strong>What is this? Why did you make it?</strong>
           <br />
           This is a website that allows you to search maps based on some stats
-          that I calculated for the newest ranked maps that show up in the osu!
-          website. It is not intended to be a complete database of all ranked
-          maps, only some 51k maps I had on lazer on my PC and newly ranked
-          maps. Therefore, the database will be partially purged to keep its
-          size constant while being updated with new maps if it grows too large
-          for me to maintain.
+          calculated for all ranked maps in osu! standard until 01/01/2026.
           <br />
           The aim stat is the one I care about the most. I created this simple
           stat by rewarding jump (1/2 rhythm) sections of songs and penalizing
@@ -173,9 +168,7 @@
         </div>
       </div>
     </div>
-    <div class="beatmap-container">
-      <div id="loading">Loading...</div>
-    </div>
+    <div class="beatmap-container"></div>
     <footer>
       <span id="prev">&leftarrow; </span>
       <span id="page-nr"></span>
