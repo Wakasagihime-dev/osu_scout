@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="index.css" />
     <link rel="shortcut icon" href="assets/pippi.ico" type="image/x-icon" />
@@ -12,168 +11,281 @@
   <body>
     <nav>
       <div class="logo">osu-scout</div>
-      <div class="search">
-        <input type="search" id="search-box" />
-        <div class="sort">
-          <label for="sort" data-desc="asc">(Asc.)</label>
-          <select name="sort" id="sort">
-            <option value="date_ranked">Date Ranked</option>
-            <option value="aim">Aim</option>
-            <option value="bpm" selected>BPM</option>
-            <option value="star_rating">Star Rating</option>
-          </select>
+      <div class="config">
+        <div class="config-field">
+          <label for="star_rating">⭐ <code>min-max</code></label>
+          <input
+            class="min-max"
+            type="text"
+            id="star_rating"
+            placeholder="4.2-4.9"
+            value="4.5"
+          />
         </div>
-        <button id="prev-dataset" style="padding: 5px">
-          Load prev dataset
-        </button>
-        <button id="next-dataset" style="padding: 5px">
-          Load next dataset
-        </button>
-        <div id="dataset-val" style="padding: 2px"></div>
+        <div class="config-field">
+          <label for="ar">AR <code>min-max</code></label>
+          <input
+            class="min-max"
+            type="text"
+            id="ar"
+            placeholder="8.5-9.2"
+            value="9-9"
+          />
+        </div>
+        <div class="config-field">
+          <label for="bpm">BPM <code>min-max</code></label>
+          <input
+            class="min-max"
+            type="text"
+            id="bpm"
+            placeholder="140-180"
+            value="180-200"
+          />
+        </div>
+        <button id="search">Go! 🔍</button>
+        <button id="share" class="share-bg-color">Share 🔗</button>
       </div>
     </nav>
-    <div class="info-wrapper">
-      <div
-        id="hide-me"
-        style="
-          font-size: small;
-          color: #eee;
-          background-color: #ee6da7;
-          padding: 2px;
-          border-radius: 2px;
-          margin-bottom: 0px;
-          width: fit-content;
-          cursor: pointer;
-        "
-      >
-        show me
+    <main>
+      <div id="advanced">
+        <div class="opt">
+          <h1>Advanced options</h1>
+          <button class="" id="adv-opt-hide-btn">Show</button>
+          <div class="presets-wrapper">
+            <div class="opt">
+              <h1>Search presets</h1>
+              <hr />
+              <br />
+              <div class="filters">
+                <div id="aim-preset">Aim maps</div>
+                <div id="stream-preset">Stream maps</div>
+              </div>
+            </div>
+            <br />
+            <hr />
+            <br />
+          </div>
+          <div class="config">
+            <div class="config-field">
+              <label
+                for="avg_num_jumps"
+                style="background-color: rgb(228, 87, 46, 0.3)"
+                >Avg # jumps per jump section <code>min-max</code></label
+              >
+              <input
+                type="text"
+                class="min-max"
+                id="avg_num_jumps"
+                placeholder="0-727"
+                value="10"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="num_burst_secs"
+                style="background-color: rgb(243, 167, 18, 0.3)"
+                >Number of bursts <code>min-max</code></label
+              >
+              <input
+                type="text"
+                class="min-max"
+                id="num_burst_secs"
+                placeholder="0-727"
+                value=""
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="avg_stream_length"
+                style="background-color: rgb(41, 51, 92, 0.3)"
+                >Avg stream length <code>min-max</code></label
+              >
+              <input
+                type="text"
+                class="min-max"
+                id="avg_stream_length"
+                placeholder="0-727"
+                value="0-0"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="overall_irr_percent"
+                style="background-color: rgb(168, 198, 134, 0.3)"
+                >Irregular rhythm score (%) <code>min-max</code></label
+              >
+              <input
+                type="text"
+                class="min-max"
+                id="overall_irr_percent"
+                placeholder="0-100"
+                value="0-10"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="max_combo"
+                style="background-color: rgb(254, 95, 85, 0.3)"
+                >Max combo <code>min-max</code></label
+              >
+              <input
+                class="min-max"
+                type="text"
+                id="max_combo"
+                placeholder="924-924"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="pp_100"
+                style="background-color: rgb(155, 41, 21, 0.3)"
+                >PP 100% <code>min-max</code></label
+              >
+              <input
+                class="min-max"
+                type="text"
+                id="pp_100"
+                placeholder="170-200"
+              />
+            </div>
+
+            <div class="config-field">
+              <label for="pp_95" style="background-color: rgb(155, 41, 21, 0.3)"
+                >PP 95% <code>min-max</code></label
+              >
+              <input
+                class="min-max"
+                type="text"
+                id="pp_95"
+                placeholder="140-170"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="stream-density"
+                style="background-color: rgb(102, 155, 188, 0.3)"
+                >Stream Density <code>min-max</code></label
+              >
+              <input
+                class="min-max"
+                type="text"
+                id="stream-density"
+                placeholder="0-7.27"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="stream-spacing"
+                style="background-color: rgb(102, 155, 188, 0.3)"
+                >Stream Spacing <code>min-max</code></label
+              >
+              <input
+                class="min-max"
+                type="text"
+                id="stream-spacing"
+                placeholder="0-5"
+              />
+            </div>
+
+            <div class="config-field">
+              <label for="id" style="background-color: rgb(134, 22, 87, 0.3)"
+                >Beatmap ID</label
+              >
+              <input type="text" id="id" placeholder="54697" />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="beatmapset_id"
+                style="background-color: rgb(134, 22, 87, 0.3)"
+                >Beatmapset ID</label
+              >
+              <input type="text" id="beatmapset_id" placeholder="14983" />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="title"
+                style="background-color: rgb(170, 68, 101, 0.3)"
+                >Title</label
+              >
+              <input
+                type="text"
+                id="title"
+                class="text-search"
+                placeholder="Numb (Nightcore Ver.)"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="artist"
+                style="background-color: rgb(170, 68, 101, 0.3)"
+                >Artist</label
+              >
+              <input
+                type="text"
+                id="artist"
+                class="text-search"
+                placeholder="Jan Wayne Vs. Raindropz"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="creator"
+                style="background-color: rgb(170, 68, 101, 0.3)"
+                >Creator</label
+              >
+              <input
+                class="text-search"
+                type="text"
+                id="creator"
+                placeholder="KIA"
+              />
+            </div>
+
+            <div class="config-field">
+              <label for="tags" style="background-color: rgb(170, 68, 101, 0.3)"
+                >Tags</label
+              >
+              <input
+                type="text"
+                id="tags"
+                class="text-search"
+                placeholder="electronic english linkin park"
+              />
+            </div>
+
+            <div class="config-field">
+              <label
+                for="version"
+                style="background-color: rgb(170, 68, 101, 0.3)"
+                >Difficulty name</label
+              >
+              <input
+                class="text-search"
+                type="text"
+                id="version"
+                placeholder="SteRRuM's Insane"
+              />
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="info" style="display: none">
-        <div>Hello world!</div>
-        <br />
-        <div>
-          <strong> Text search example (text-type query): </strong>
-          <code>
-            creator="akitoshi" artist="kawada mimi fripside" tags="japanese
-            anime"
-          </code>
-          <br />
-          <br />
-          <strong>Explanation: </strong>
-          Well, this is really simple. Please keep in mind to hit enter for the
-          search results to come. The only thing I have to mention is that I did
-          not put too much effort in the code because I am not too bothered. So
-          you will get maps with songs sung by kawada, mimi, and fripside (for
-          those who don't get the issue with this kawada mimi is one artist, not
-          two separate artists kawada and mimi). Another example, if you write:
-          <br />
-          <br />
-          <code> artist="imperial circus dead decadance" </code>
-          <br />
-          <br />
-          you will get maps of songs sung by ICDD and also sung by this band for
-          example: "Girls Dead Monster STARRING LiSA" because both contain the
-          word dead. Not a bug, a feature.
-          <br />
-          <strong>IMPORTANT: </strong>you must include the quotes ("") when
-          doing text based search!
-          <br />
-          <strong>Note: </strong>you can of course combine this with number-type
-          stat search query. Number stats are explained below.
-        </div>
-        <br />
-        <div>
-          <strong>Number stats search example (number-type query): </strong>
-          <code> aim=75 star_rating=4-4.5 bpm=150-180 ar=9 </code>
-          <br />
-          <br />
-          <strong>Explanation: </strong>
-          <code>aim=75</code> means that you will get maps scoring more than 75%
-          on aim stat (a stat that I made to calculate how likely the map is to
-          be a comfy aim map). Interpret it as a percentage (0% burst heavy map
-          to 100% is aim centered map). This value can exceed 100. I know
-          percentages do not but it was my decision to reward certain parts of
-          maps to distinguish them as "aim heavy", think of the value on top of
-          the 100% as a bonus to the stat. Keep in mind you can either do
-          something like <code>aim=82</code> or <code>aim=85-96</code> which
-          defines minimum or both minimum and maximum respectively. You cannot
-          define a maximum alone! This goes for all number-type stats (see list
-          of all of them below in usage)!
-          <br />
-          <br />
-          <code>star_rating=4-4.5</code> means that you will get maps that are
-          greater than or equal to 4* in difficulty and less or equal to 4.5* in
-          difficulty.
-          <br />
-          <br />
-          <code>bpm=150-180</code> you can take a guess. Maps between 150 BPM
-          and 180 BPM.
-          <br />
-          <br />
-          <code>ar=9</code> means that the minimum approach rate in the maps you
-          get will be 9.
-          <br />
-          <br />
-          In general you can provide either a single value or a hyphen separated
-          range of min and max values (inclusive).
-        </div>
-        <br />
-        <div>
-          <strong>Usage: </strong>
-          The following search keywords are to be used:
-          <ul>
-            <li>aim</li>
-            <li>stream-density</li>
-            <li>stream-spacing</li>
-            <li>ar</li>
-            <li>bpm</li>
-            <li>star_rating</li>
-            <li>pp_100</li>
-            <li>pp_95</li>
-            <li>max_combo</li>
-          </ul>
-        </div>
-        <br />
-        <div>
-          <strong>See all beatmaps: </strong>
-          To see the current list of all beatmaps simply empty the search field
-          (backspace) and hit <code>Enter</code>.
-        </div>
-        <br />
-        <div>
-          <strong>What is this? Why did you make it?</strong>
-          <br />
-          This is a website that allows you to search maps based on some stats
-          calculated for all ranked maps in osu! standard until 01/01/2026.
-          <br />
-          The aim stat is the one I care about the most. I created this simple
-          stat by rewarding jump (1/2 rhythm) sections of songs and penalizing
-          irregular rhythm sections and streams (anything not 1/2 gets penalty).
-          Geometry/circle position is not taken into account which has its own
-          implications and "bugs" but they are not significant enough for me to
-          worry about. You could also use this as a stamina trainer because
-          stream density and stream spacing are also calculated for each map. If
-          you have ever used
-          <a href="https://ost.sombrax79.org/" target="_blank">sombrax</a>
-          you'll know what these stats mean.
-        </div>
-        <br />
-        <div>
-          <strong>Thank you for reading. </strong>
-          If you found this useful and want to say thanks or want suggest
-          something or want to criticize something
-          <a href="https://osu.ppy.sh/users/34763802" target="_blank"
-            >then hit me up on osu!</a
-          >
-        </div>
-      </div>
-    </div>
+    </main>
+    <div id="loading">Loading...</div>
     <div class="beatmap-container"></div>
-    <footer>
-      <span id="prev">&leftarrow; </span>
-      <span id="page-nr"></span>
-      <span id="next"> &rightarrow;</span>
-      <div>osu-scout</div>
-    </footer>
+    <div id="footer">
+      <button class="prev-btn">prev</button>
+      <button class="next-btn">next</button>
+    </div>
   </body>
 </html>

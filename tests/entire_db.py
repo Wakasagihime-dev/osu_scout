@@ -1,8 +1,8 @@
 import os
 import json
 from osu_file_parser import create_stats_entry
-OSU_FILES_DIRPATH = "C:/programming-tools/projects/MarisaCodes/sandbox/osu-scout-related/2026_01_01_osu_files"
-DB_DUMP_DIRPATH = "C:/programming-tools/projects/Wakasagihime-dev/osu_scout/db_2026_01_01"
+OSU_FILES_DIRPATH = "C:/programming-tools/projects/Wakasagihime-dev/osu_scout_analyser/2026_06_02_osu_files"
+DB_DUMP_DIRPATH = "C:/programming-tools/projects/Wakasagihime-dev/osu_scout_analyser/db_2026_06_02"
 CHUNK_SIZE = 5000
 
 osu_fpaths = []

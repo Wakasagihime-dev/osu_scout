@@ -1,356 +1,287 @@
-let numGroups = 0;
-const defaultSearch = `aim=80-95 star_rating=4 bpm=140-190`;
+const SERVER_URL = "https://osu-scout-server.onrender.com/";
+
 document.addEventListener("DOMContentLoaded", () => {
-  // DEFINE ELEMENTS
-  const bmContainer = document.querySelector(".beatmap-container");
-  const searchBox = document.getElementById("search-box");
-  searchBox.value = defaultSearch;
-  const infoHideBtn = document.getElementById("hide-me");
-  const info = document.querySelector("div.info");
-  const pgNrSpan = document.getElementById("page-nr");
-  const prev = document.getElementById("prev");
-  const next = document.getElementById("next");
-  const sortSelect = document.getElementById("sort");
-  const sortDescAsc = document.querySelector("div.sort label");
-  const prevDset = document.getElementById("prev-dataset");
-  const nextDset = document.getElementById("next-dataset");
-  const currDset = document.getElementById("dataset-val");
-  // Hide and show info
-  infoHideBtn.addEventListener("click", (ev) => {
-    if (infoHideBtn.textContent.trim() === "hide me") {
-      info.style.display = "none";
-      infoHideBtn.textContent = "show me";
-    } else if (infoHideBtn.textContent.trim() === "show me") {
-      info.style.display = "block";
-      infoHideBtn.textContent = "hide me";
-    }
-  });
-  // INITIAL SETUP/VALUES and loading Pages in memory
-  let pages = []; // array of arrays each inner array has objects
-  const pageSize = 6; // a single array would have 6 objects
-  let pageNumber = 1; // page number
-  localStorage.setItem("group", "0");
-  pgNrSpan.innerHTML = "Loading...";
-  // initial data fetch
-  // // decode URI search params if necessary
-  const params = new URLSearchParams(window.location.search);
-  const q = params.get("q");
-  const decoded = decodeURIComponent(q);
-  if (q) {
-    searchBox.value = decoded;
-  } else {
-    searchBox.value = defaultSearch;
+  const el = {
+    presetsWrapper: document.querySelector(".presets-wrapper"),
+    hideAdvOptsBtn: document.getElementById("adv-opt-hide-btn"),
+    beatmapContainer: document.querySelector("div.beatmap-container"),
+    prevBtn: document.querySelector(".prev-btn"),
+    nextBtn: document.querySelector(".next-btn"),
+    searchBtn: document.getElementById("search"),
+    bmIdInp: document.getElementById("id"),
+    bmsetIdInp: document.getElementById("beatmapset_id"),
+    textSearchInps: document.querySelectorAll('Input[type="text"].text-search'),
+    minMaxInps: document.querySelectorAll('input[type="text"].min-max'),
+    aimPresetBtn: document.getElementById("aim-preset"),
+    streamPresetBtn: document.getElementById("stream-preset"),
+    loading: document.getElementById("loading"),
+    share: document.getElementById("share"),
+  };
+  const presetFields = {
+    arInp: document.getElementById("ar"),
+    bpmInp: document.getElementById("bpm"),
+    srInp: document.getElementById("star_rating"),
+    avgNumJumpsInp: document.getElementById("avg_num_jumps"),
+    numBurstsInp: document.getElementById("num_burst_secs"),
+    avgStreamLenInp: document.getElementById("avg_stream_length"),
+    overallIrrInp: document.getElementById("overall_irr_percent"),
+    streamDensityInp: document.getElementById("stream-density"),
+    streamSpacingInp: document.getElementById("stream-spacing"),
+  };
+  // [GEN QUERY ALL FIELDS]
+  function parseAllFields(el) {
+    const reqObj = {};
+    // [Min-Max]
+    el.minMaxInps.forEach((field) => {
+      Object.assign(reqObj, parseMinMax(field.id, field.value));
+    });
+    // [/Min-Max]
+    // [Text-search]
+    const textQueries = { $and: [] };
+    el.textSearchInps.forEach((field) => {
+      const tQuery = parseText(field.id, field.value);
+      tQuery ? textQueries["$and"].push(...tQuery) : null;
+    });
+    textQueries["$and"].length ? Object.assign(reqObj, textQueries) : null;
+    // [/Text-search]
+    // [Beatmap ID and beatmapset ID]
+    const id = el.bmIdInp.value;
+    const setId = el.bmsetIdInp.value;
+    id ? Object.assign(reqObj, { id: parseInt(id) }) : null;
+    setId ? Object.assign(reqObj, { beatmapset_id: parseInt(setId) }) : null;
+    // [/Beatmap ID and beatmapset ID
+    return reqObj;
   }
-  fetchDB().then((data) => {
-    pgNrSpan.innerHTML = "Loading...";
-    const descAscVal = sortDescAsc.getAttribute("data-desc");
-    sortMaps(sortSelect, data, descAscVal);
-    pages = parseUserSearch(
-      searchBox.value.trim().toLowerCase(),
-      data,
-      createPagesArray(data, pageSize),
-      pageSize,
-    );
-    currDset.innerHTML = `${(((0 % numGroups) + numGroups) % numGroups) + 1} out of ${numGroups} datasets.`;
-    if (pages.length == 0) {
-      pgNrSpan.innerHTML = "Wow such empty...";
-      return;
+  // [/GEN QUERY ALL FIELDS]
+
+  // [HIDE ADV OPT]
+  el.hideAdvOptsBtn.addEventListener("click", (e) => {
+    if (e.target.textContent.toLowerCase() === "hide") {
+      document.querySelector("#advanced > div.opt > div.config").style.display =
+        "none";
+      el.presetsWrapper.style.display = "none";
+      e.target.textContent = "Show";
+    } else {
+      document.querySelector("#advanced > div.opt > div.config").style.display =
+        "flex";
+      el.presetsWrapper.style.display = "block";
+      e.target.textContent = "Hide";
     }
-    renderPage(pages, pageNumber);
   });
-  // // PREV change dataset
-  prevDset.addEventListener("click", () => {
-    const grp = parseInt(localStorage.getItem("group"));
-    bmContainer.innerHTML = "";
-    pgNrSpan.innerHTML = "Loading...";
-    fetchDB(grp - 1).then((data) => {
-      pageNumber = 1;
-      const descAscVal = sortDescAsc.getAttribute("data-desc");
-      sortMaps(sortSelect, data, descAscVal);
-      pages = parseUserSearch(
-        searchBox.value.trim().toLowerCase(),
-        data,
-        createPagesArray(data, pageSize),
-        pageSize,
-      );
-      localStorage.setItem("group", `${grp - 1}`);
-      currDset.innerHTML = `${((((grp - 1) % numGroups) + numGroups) % numGroups) + 1} out of ${numGroups} datasets.`;
-      if (pages.length == 0) {
-        pgNrSpan.innerHTML = "Wow such empty...";
-        return;
-      }
-      renderPage(pages, pageNumber);
+  // [/HIDE ADV OPT]
+  // [INIT PAGE LOAD DATA]
+  const urlParams = new URLSearchParams(window.location.search);
+  let reqObj = parseAllFields(el);
+  if (urlParams.has("q")) {
+    reqObj = JSON.parse(decodeURIComponent(urlParams.get("q")));
+  }
+  get_data(el, reqObj);
+  // [/INIT PAGE LOAD DATA]
+  // [NEXT PAGE]
+  el.nextBtn.addEventListener("click", (e) => {
+    const reqObj = parseAllFields(el);
+    Object.assign(reqObj, { after: e.target.id });
+    get_data(el, reqObj);
+  });
+  // [/NEXT PAGE]
+  // [PREV PAGE]
+  el.prevBtn.addEventListener("click", (e) => {
+    const reqObj = parseAllFields(el);
+    Object.assign(reqObj, { before: e.target.id });
+    get_data(el, reqObj);
+  });
+  // [/PREV PAGE]
+  // [Search Go!]
+  el.searchBtn.addEventListener("click", (e) => {
+    // [Fetch]
+    const reqObj = parseAllFields(el);
+    get_data(el, reqObj);
+    // [/Fetch]
+  });
+  // [/Search Go!]
+  // [AIM PRESET]
+  el.aimPresetBtn.addEventListener("click", (e) => {
+    document.body.querySelectorAll('input[type="text"]').forEach((item) => {
+      item.value = "";
     });
+    presetFields.srInp.value = "4.2-4.9";
+    presetFields.arInp.value = "8.5-9.2";
+    presetFields.bpmInp.value = "140-180";
+    presetFields.avgNumJumpsInp.value = "15";
+    presetFields.numBurstsInp.value = "0";
+    presetFields.avgStreamLenInp.value = "0-0";
+    presetFields.overallIrrInp.value = "0-7.27";
   });
-  // // NEXT change dataset
-  nextDset.addEventListener("click", () => {
-    pageNumber = 1;
-    const grp = parseInt(localStorage.getItem("group"));
-    bmContainer.innerHTML = "";
-    pgNrSpan.innerHTML = "Loading...";
-    fetchDB(grp + 1).then((data) => {
-      const descAscVal = sortDescAsc.getAttribute("data-desc");
-      sortMaps(sortSelect, data, descAscVal);
-      pages = parseUserSearch(
-        searchBox.value.trim().toLowerCase(),
-        data,
-        createPagesArray(data, pageSize),
-        pageSize,
-      );
-      localStorage.setItem("group", `${grp + 1}`);
-      currDset.innerHTML = `${((((grp + 1) % numGroups) + numGroups) % numGroups) + 1} out of ${numGroups} datasets.`;
-      if (pages.length == 0) {
-        pgNrSpan.innerHTML = "Wow such empty...";
-        return;
-      }
-      renderPage(pages, pageNumber);
+  // [/AIM PRESET]
+  // [STREAM PRESET]
+  el.streamPresetBtn.addEventListener("click", (e) => {
+    document.body.querySelectorAll('input[type="text"]').forEach((item) => {
+      item.value = "";
     });
+    presetFields.srInp.value = "4.5";
+    presetFields.arInp.value = "9";
+    presetFields.bpmInp.value = "170";
+    presetFields.avgNumJumpsInp.value = "5";
+    presetFields.avgStreamLenInp.value = "9";
+    presetFields.overallIrrInp.value = "0-25";
+    presetFields.streamDensityInp = "0.25";
+    presetFields.streamSpacingInp = "0-1";
   });
-  // going back a page CLICK EVENT
-  prev.addEventListener("click", (ev) => {
-    if (pages.length <= 1 || pageNumber === 1) {
-      ev.preventDefault();
-      return;
-    }
-    renderPage(pages, pageNumber - 1);
-    pageNumber -= 1;
+  // [/STREAM PRESET]
+  // [SHARE]
+  el.share.addEventListener("click", (e) => {
+    navigator.clipboard.writeText(window.location.href);
+    e.target.textContent = "copied!";
+    e.target.classList.remove("share-bg-color");
+    e.target.classList.add("copied-bg-color");
+    setTimeout(() => {
+      e.target.textContent = "Share 🔗";
+      e.target.classList.add("share-bg-color");
+      e.target.classList.remove("copied-bg-color");
+    }, 1000);
   });
-  // going to the next page CLICK EVENT
-  next.addEventListener("click", (ev) => {
-    if (pages.length <= 1 || pageNumber === pages.length) {
-      ev.preventDefault();
-      return;
-    }
-    renderPage(pages, pageNumber + 1);
-    pageNumber += 1;
-  });
-  // search keyup "ENTER" event
-  searchBox.addEventListener("keyup", (ev) => {
-    if (ev.key == "Enter") {
-      const descAscVal = sortDescAsc.getAttribute("data-desc");
-      fetchDB(parseInt(localStorage.getItem("group"))).then((data) => {
-        if (!ev.target.value.trim()) {
-          sortMaps(sortSelect, data, descAscVal);
-          pages = createPagesArray(data, pageSize);
-          pageNumber = 1;
-          renderPage(pages, pageNumber);
-          return;
-        }
-        sortMaps(sortSelect, data, descAscVal);
-        pages = parseUserSearch(
-          ev.target.value.trim().toLowerCase(),
-          data,
-          pages[pageNumber - 1],
-          pageSize,
-        );
-        // change address bar
-        history.replaceState(
-          null,
-          "",
-          `?q=${encodeURIComponent(ev.target.value.trim())}`,
-        );
-        // end change
-        if (pages.length) {
-          pageNumber = 1;
-          renderPage(pages, pageNumber);
-        } else {
-          document.querySelector(".beatmap-container").innerHTML =
-            "Wow such empty...";
-          document.getElementById("page-nr").innerHTML = "? of ?";
-        }
-      });
-    }
-  });
-  // SORT SELECT val on change
-  sortSelect.addEventListener("change", () => {
-    const descAscVal = sortDescAsc.getAttribute("data-desc");
-    const data = pages.flat();
-    sortMaps(sortSelect, data, descAscVal);
-    pages = createPagesArray(data, pageSize);
-    pageNumber = 1;
-    renderPage(pages, pageNumber);
-  });
-  // Click event on SORT ASC/DESC label
-  sortDescAsc.addEventListener("click", (ev) => {
-    const descText = "(Desc.)";
-    const ascText = "(Asc.)";
-    const currVal = ev.target.innerHTML.trim();
-    // read and update label for desc/asc
-    if (currVal === descText) {
-      sortDescAsc.innerHTML = ascText;
-      sortDescAsc.setAttribute("data-desc", "asc");
-    } else if (currVal === ascText) {
-      sortDescAsc.innerHTML = descText;
-      sortDescAsc.setAttribute("data-desc", "desc");
-    }
-    // update the data
-    const data = pages.flat();
-    sortMaps(sortSelect, data, sortDescAsc.getAttribute("data-desc"));
-    pages = createPagesArray(data, pageSize);
-    pageNumber = 1;
-    renderPage(pages, pageNumber);
-  });
+  // [/SHARE]
 });
 
-// UTILITY FUNCTIONS
+/***  [UTILS]  ***/
+// // // [FETCH DATA]
+function get_data(el, reqObj) {
+  // [URL STATE]
+  window.history.replaceState({}, "", window.location.pathname);
+  // [/URL STATE]
+  // [LOADING]
+  el.beatmapContainer.innerHTML = "";
+  el.loading.style.display = "block";
+  // [/LOADING]
+  // [DISABLE ALL BUTTONS]
+  el.searchBtn.disabled = true;
+  el.prevBtn.disabled = true;
+  el.nextBtn.disabled = true;
+  el.share.disabled = true;
+  // [/DISABLE ALL BUTTONS]
+  // [If triggered by prev/next click]
+  if (reqObj.after || reqObj.before) {
+    el.prevBtn.disabled = true;
+    el.nextBtn.disabled = true;
+  }
+  // [/If triggered by prev/next click]
 
-// fetch
-async function fetchDB(group = 0) {
-  const groups = await fetch("./db_2026_01_01/info.json").then((r) => r.json());
-  if (numGroups === 0) {
-    numGroups = groups.length;
-  }
-  const files =
-    groups[((group % groups.length) + groups.length) % groups.length];
-  const data = await Promise.all(
-    files.map((f) => fetch(f).then((r) => r.json())),
-  );
-  return data.flat();
+  fetch(SERVER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reqObj),
+  }).then((res) => {
+    res.text().then((html) => {
+      el.beatmapContainer.innerHTML = html;
+      if (el.beatmapContainer.querySelector("#not-found")) {
+        // [Search Go! button]
+        el.searchBtn.disabled = false;
+        // [/Search Go! button]
+        // [END Loading]
+        el.loading.style.display = "none";
+        // [/END loading]
+        // [ALLOW SHARE]
+        el.share.disabled = false;
+        // [/ALLOW SHARE]
+        return;
+      }
+      // [SHOW MORE OPT STATS]
+      showMoreOptStats();
+      // [/SHOW MORE OPT STATS]
+      // [Next & Prev Btns]
+      const prevEl = document.getElementById("prev");
+      const prevBtn = document.querySelector(".prev-btn");
+      prevBtn.id = prevEl.value;
+
+      const nextEl = document.getElementById("next");
+      const nextBtn = document.querySelector(".next-btn");
+      nextBtn.id = nextEl.value;
+
+      el.prevBtn.disabled = false;
+      el.nextBtn.disabled = false;
+      // [/Next & Prev Btns]
+      // [Search Go! button]
+      el.searchBtn.disabled = false;
+      // [/Search Go! button]
+      // [SHARE BUTTON]
+      el.share.disabled = false;
+      // [/SHARE BUTTON]
+      // [URL PARAMS]
+      const params = new URLSearchParams();
+      params.set("q", encodeURIComponent(JSON.stringify(reqObj)));
+      window.history.pushState({}, "", `?${params.toString()}`);
+      // [/URL PARAMS]
+      // [END Loading]
+      el.loading.style.display = "none";
+      // [/END loading]
+    });
+  });
 }
-// sort
-function sortMaps(sortSelect, data, descAsc) {
-  const multiplier = descAsc === "desc" ? 1 : -1;
-  if (sortSelect.value === "date_ranked") {
-    data.sort((a, b) => multiplier * (b.id - a.id));
-  } else if (sortSelect.value === "aim") {
-    data.sort((a, b) => multiplier * (b.aim - a.aim));
-  } else if (sortSelect.value === "bpm") {
-    data.sort((a, b) => multiplier * (b.bpm - a.bpm));
-  } else if (sortSelect.value === "star_rating") {
-    data.sort((a, b) => multiplier * (b.star_rating - a.star_rating));
+// // // [/FETCH DATA]
+// // // [MIN-MAX PARSING]
+function parseMinMax(key, val) {
+  /* *
+   * Query generator
+   * returns search object to be used by pymongo in the backend
+   */
+  if (val.includes("-")) {
+    if (val.split("-").length !== 2) {
+      return {};
+    }
+    const range = val.split("-");
+    const min = Number.isNaN(parseFloat(range[0])) ? 0 : parseFloat(range[0]);
+    const max = Number.isNaN(parseFloat(range[1])) ? 0 : parseFloat(range[1]);
+    if (range[0] == "" && Number.isNaN(parseFloat(range[1]))) {
+      return { [`${key}`]: { $gte: 0, $lte: max } };
+    } else if (range[1] == "" && Number.isNaN(parseFloat(range[0]))) {
+      return { [`${key}`]: { $gte: min, $lte: 10000 } };
+    }
+    return { [`${key}`]: { $gte: min, $lte: max } };
+  } else {
+    const min = Number.isNaN(parseFloat(val)) ? 0 : parseFloat(val);
+    return { [`${key}`]: { $gte: min } };
   }
 }
-// user search
-function parseUserSearch(q, data, currPages, pageSize) {
-  if (!q || typeof q !== "string") {
-    return currPages;
+// // // [/MIN-MAX PARSING]
+// // // [Text-Search PARSING]
+function parseText(key, val) {
+  /* *
+   * Query generator
+   * returns search object to be used by pymongo in the backend
+   */
+  if (!val) {
+    return null;
   }
-  let filteredData = data;
-  // this section has text filters
-  if (q.includes("title=")) {
-    filteredData = filterByText(q, filteredData, "title");
-  }
-  if (q.includes("tags=")) {
-    filteredData = filterByText(q, filteredData, "tags");
-  }
-  if (q.includes("creator=")) {
-    filteredData = filterByText(q, filteredData, "creator");
-  }
-  if (q.includes("artist=")) {
-    filteredData = filterByText(q, filteredData, "artist");
-  }
-  // exclude text filters since they are done
-  const filters = q
-    .split(" ")
-    .filter(
-      (a) =>
-        a.includes("=") &&
-        !a.includes("title=") &&
-        !a.includes("tags=") &&
-        !a.includes("creator=") &&
-        !a.includes("artist=") &&
-        !a.includes("ranked="),
-    );
-  // this section has numerical filtering
-  for (let i = 0; i < filters.length; i++) {
-    const filter = filters[i];
-    const key = filter.split("=")[0];
-    const vals = filter
-      .split("=")[1]
-      .split("-")
-      .map((v) => parseFloat(v));
-    if (Object.keys(data[0]).indexOf(key) == -1) {
-      continue;
-    }
-    if (vals.some(Number.isNaN) || vals.length > 2 || vals.length == 0) {
-      continue;
-    }
-    filteredData = filteredData.filter((b) => {
-      if (vals.length == 1) {
-        if (b[key] >= vals[0]) {
-          return b;
-        }
+  const tokens = escapeRegExp(val).split(" ");
+  return tokens.map((t) => {
+    return {
+      [`${key}`]: { $regex: t, $options: "i" },
+    };
+  });
+}
+// // // [/Text-Search PARSING]
+// // // [SHOW MORE OPT STATS]
+function showMoreOptStats() {
+  document.querySelectorAll(".more-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const optStatsEl = e.target.nextElementSibling;
+      const display = getComputedStyle(optStatsEl).display;
+      if (display === "none") {
+        optStatsEl.style.display = "flex";
+        e.target.textContent = "less...";
       } else {
-        if (b[key] >= vals[0] && b[key] <= vals[1]) {
-          return b;
-        }
+        optStatsEl.style.display = "none";
+        e.target.textContent = "more...";
       }
     });
-  }
-  return createPagesArray(filteredData, pageSize);
+  });
 }
-// filter/search results for text based properties like song title, map creator, artist, etc
-function filterByText(query, data, key) {
-  let regexp;
-  if (key === "title") {
-    regexp = /title="([^"]*)"/;
-  } else if (key === "tags") {
-    regexp = /tags="([^"]*)"/;
-  } else if (key === "creator") {
-    regexp = /creator="([^"]*)"/;
-  } else if (key === "artist") {
-    regexp = /artist="([^"]*)"/;
-  }
-  const match = query.match(regexp);
-  let filteredData = data;
-  if (match) {
-    const words = match[1].split(" ");
-    filteredData = filteredData.filter((m) => {
-      const str = m[key]
-        .trim()
-        .toLowerCase()
-        .split(" ")
-        .map((_) => _.trim());
-      const cond = words.some((word) => str.includes(word.trim()));
-      return cond;
-    });
-  }
-  return filteredData;
+// // // [Escape RegExp]
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
-function renderPage(pages, pageNumber) {
-  const bmContainer = document.querySelector(".beatmap-container");
-  bmContainer.innerHTML = "";
-  const pgNrSpan = document.getElementById("page-nr");
-  for (let i = 0; i < pages[pageNumber - 1].length; i++) {
-    const bm = pages[pageNumber - 1][i];
-    const bmDiv = document.createElement("div");
-    bmDiv.classList.add("beatmap-card");
-    bmDiv.innerHTML = bmInnerHTMLTemplate(bm);
-    bmContainer.appendChild(bmDiv);
-  }
-  pgNrSpan.innerHTML = `${pageNumber} of ${pages.length ? pages.length : 1}`;
-}
-function createPagesArray(data, pageSize) {
-  const pages = [];
-  for (let i = 0; i < data.length; i += pageSize) {
-    pages.push(data.slice(i, i + pageSize));
-  }
-  return pages;
-}
-function bmInnerHTMLTemplate(bmData) {
-  return `
-        <div class="image-wrap">
-          <img
-            src="${bmData.bg_url}"
-            alt="background image of the beatmapset"
-          />
-        </div>
-        <div class="stats">
-          <div><span>Aim</span><span>${Number(bmData.aim).toFixed(2)}</span></div>
-          <div><span>BPM</span><span>${Number(bmData.bpm).toFixed(2)}</span></div>
-          <div><span>stream density</span><span>${Number(bmData["stream-density"]).toFixed(2)}</span></div>
-          <div><span>stream spacing</span><span>${Number(bmData["stream-spacing"]).toFixed(2)}</span></div>
-          <div><span>AR</span><span>${Number(bmData.ar).toFixed(2)}</span></div>
-          <div><span>star rating</span><span>${Number(bmData.star_rating).toFixed(2)}</span></div>
-          <div><span>100% PP</span><span>${Number(bmData.pp_100).toFixed(2)}</span></div>
-          <div><span>95% PP</span><span>${Number(bmData.pp_95).toFixed(2)}</span></div>
-          <div><span>Max combo</span><span>${bmData.max_combo}</span></div>
-          <div><span>Difficulty name</span><span>${bmData.version}</span></div>
-        </div>
-        <div class="map-link">
-          <a href="${bmData.url}"
-          target="_blank"
-            >${bmData.title}</a
-          >
-        </div>`.trim();
-}
+// // // [/Escape RegExp]
+// // // [/SHOW MORE OPT STATS]
+/***   [/UTILS]   ***/

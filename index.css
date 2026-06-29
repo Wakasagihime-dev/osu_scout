@@ -1,170 +1,314 @@
-/* === reset === */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* 
+  RESET
+*/
+* {
   margin: 0;
   padding: 0;
-  background-color: #222;
-  color: #ccc;
+  box-sizing: border-box;
 }
-
 html,
 body {
   height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
-
+img {
+  max-width: 100%;
+  display: block;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+/* 
+  body styles and misc. styles
+*/
 body {
-  font-family: system-ui, sans-serif;
-  line-height: 1.4;
-  background: #fafafa;
+  background-color: #222;
+  color: #eee;
 }
-/* === nav === */
-nav,
-nav > * {
-  background-color: #111;
-}
+/* 
+  Nav
+*/
 nav {
+  background-color: #111;
   padding: 10px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
 }
-div.logo {
-  padding: 7px;
-  border-radius: 10px;
-  color: #eee;
-  border: 2px solid #eee;
-  background-color: #ee6da7;
-}
-div.search {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  width: 50%;
-}
-input[type="search"] {
-  outline: none;
-  border: 2px solid #333;
-  font-size: 16px;
-  padding: 2px;
-  width: 100%;
-}
-div.sort {
-  display: flex;
-  gap: 5px;
-}
-div.sort label,
-div.sort select {
-  padding: 2px 5px;
-}
-div.sort label {
-  cursor: pointer;
-}
-/* === info === */
-div.info-wrapper {
-  padding: 30px;
-}
-div.info {
-  border: 2px solid #ccc;
+nav > div.logo {
   padding: 10px;
   font-family: monospace;
-  font-size: 14px;
-  line-height: 35px;
+  font-weight: 500;
+  font-size: larger;
+  background-color: #2d0e41;
+  border-radius: 5px;
+  border: 2px solid #4f1766;
 }
-div.info a {
-  color: #ee6da7;
+nav > div.config > div.config-field > input[type="text"] {
+  width: 85px;
 }
-div.info > div strong {
-  color: yellow;
+nav button#search {
+  background-color: #ffc83d;
+  border-radius: 5px;
+  border: 2px solid #db669a;
+  padding: 3px 7.27px;
+  color: #222;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: larger;
 }
-div.info > div code {
-  color: #ee6da7;
+nav button#search:hover {
+  box-shadow: inset 0 100px rgba(0, 0, 0, 0.2);
+}
+nav button#search:disabled {
+  background-color: #303030;
+}
+nav button#share {
+  border-radius: 5px;
+  border: 2px solid #4f1766;
+  padding: 3px 7.27px;
+  color: #ccc;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: larger;
+}
+nav button#share:hover {
+  box-shadow: inset 0 100px rgba(0, 0, 0, 0.2);
+}
+.share-bg-color {
+  background-color: #bc1f7e;
+}
+.copied-bg-color {
+  background-color: #57ce58;
+}
+nav button#share:disabled {
+  background-color: #303030;
+}
+@media (max-width: 768px) {
+  nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  nav > div.config {
+    gap: 5px;
+  }
+}
+nav code {
+  background-color: rgb(79, 23, 102, 0.5);
+  padding: 2px;
+  border-radius: 2px;
+}
+/* 
+  Config and config field styles
+*/
+div.config {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+div.config-field {
+  display: flex;
+  gap: 0;
+}
+div.config-field > input[type="text"] {
+  background-color: #222;
+  border: 2px solid #303030;
   padding: 5px;
-  border: 1px solid #ccc;
-  background-color: #111;
+  color: #57ce58;
 }
-div.info ul {
+div.config-field > input[type="text"]::placeholder {
+  color: #666;
+}
+div.config-field > label {
+  background-color: rgb(45, 14, 65, 0.3);
+  padding: 5px;
+  border: transparent;
+  border-radius: 2px;
+}
+@media (max-width: 768px) {
+  div.config-field > label {
+    font-size: smaller;
+  }
+}
+/* main element after nav */
+main {
+  padding: 7.27px;
+  margin: 7.27px;
+  border: 1.5px solid #327490;
+  border-radius: 2.727px;
+}
+#advanced > div.opt {
+  border: 2.5px solid #bc1f7e;
+  border-radius: 5px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
-/* === layout === */
+#advanced > div.opt > button {
+  align-self: flex-end;
+  background-color: #327490;
+  padding: 3px 7.27px;
+  border: 2px solid #cccccc;
+  border-radius: 5px;
+  color: #cccccc;
+  cursor: pointer;
+}
+#advanced > div.opt > button:hover {
+  box-shadow: inset 0 100px rgba(0, 0, 0, 0.2);
+}
+#advanced div.filters {
+  display: flex;
+  gap: 10px;
+}
+#advanced div.filters > div {
+  background-color: #4f1766;
+  color: #eee;
+  font-family: monospace;
+  padding: 5px;
+  border: 2px solid transparent;
+  border-radius: 2.5px;
+  width: fit-content;
+  margin-left: 15px;
+  cursor: pointer;
+}
+#advanced div.filters > div:hover {
+  border: 2px solid #ffc83d;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.2);
+}
+#advanced h1 {
+  font-size: larger;
+  padding-bottom: 5px;
+}
+main > #advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+#advanced .opt .config label code {
+  background-color: rgb(45, 14, 65, 0.7);
+  padding: 1.5px;
+  border: transparent;
+  border-radius: 2.5px;
+}
+#advanced > div.opt > div.config {
+  display: none;
+  flex-wrap: wrap;
+}
+#advanced .presets-wrapper {
+  display: none;
+}
+@media (max-width: 768px) {
+  #advanced > div.opt > div.config input[type="text"] {
+    width: 150px;
+  }
+}
+/* Beatmap and beatmap cards */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: #222;
+  font-family: sans-serif;
+}
 .beatmap-container {
   display: flex;
   flex-wrap: wrap;
+  gap: 15px;
   justify-content: center;
-  gap: 16px;
+  align-items: flex-start;
   padding: 10px;
 }
-/* === card === */
 .beatmap-card {
-  width: 400px;
-  border: 2px solid #777;
-  border-radius: 5px;
+  width: 350.727px;
+  border: 2px solid #555;
+  background-color: #1b1b1b;
 }
-
-/* fixed image size */
-.beatmap-card img {
-  width: 100%;
-  height: 140px; /* hardcoded height */
-  object-fit: cover; /* crop, no stretching */
-  display: block;
-  border-radius: 2px;
-}
-
-/* === stats === */
-.stats {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.stats > div {
-  display: flex;
-  justify-content: space-between;
-}
-
-.stats span:first-child {
-  color: #555;
-}
-/* === card footer === */
-.map-link {
+.beatmap-card .more-btn {
   text-align: center;
-  padding: 10px;
-}
-.map-link a {
-  color: #ee6da7;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-/* === page footer === */
-footer {
-  font-size: 24px;
-  width: 100%;
-  text-align: center;
-  user-select: none;
-}
-#prev,
-#next {
+  color: #db669a;
   cursor: pointer;
 }
-#prev:hover,
-#next:hover {
-  color: #ee6da7;
+.beatmap-card img {
+  width: 100%;
 }
-footer div {
-  padding: 20px 50px;
+.beatmap-card .map-link {
   text-align: center;
-  background-color: #ee6da7;
-  margin-top: 50px;
-  color: #eee;
-  user-select: none;
+  padding: 10px;
+}
+.beatmap-card .map-link a {
+  color: #db669a;
+}
+.beatmap-card .stats {
+  display: flex;
+  flex-direction: column;
+}
+.beatmap-card .stats div,
+.beatmap-card .opt-stats div {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+}
+.opt-stats {
+  display: none;
+  flex-direction: column;
+}
+.beatmap-card div,
+.beatmap-card span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.beatmap-card > .stats > div > span:first-of-type,
+.beatmap-card > .opt-stats > div > span:first-of-type {
+  color: #666;
+}
+.beatmap-card > .stats > div > span:last-of-type,
+.beatmap-card > .opt-stats > div > span:last-of-type {
+  color: #bcbcbc;
+}
+#footer {
+  padding: 20px;
+  background-color: #111;
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+}
+#footer button {
+  background-color: #327490;
+  padding: 3px 7.27px;
+  border: 2px solid #cccccc;
+  border-radius: 5px;
+  color: #cccccc;
+  cursor: pointer;
+}
+#footer button:hover {
+  box-shadow: inset 0 100px rgba(0, 0, 0, 0.2);
+}
+#footer button:disabled {
+  background-color: #303030;
+}
+#not-found {
+  font-size: large;
+  padding: 10px;
+  line-height: 30px;
+  color: #f09fc4;
+}
+#not-found img {
+  width: 300px;
+}
+#loading {
+  text-align: center;
+  color: #f09fc4;
+  font-weight: bold;
+  font-size: 50px;
+  padding: 50px;
+  margin-bottom: 300px;
+  display: none;
 }

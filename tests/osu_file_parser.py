@@ -389,74 +389,57 @@ class Beatmap:
         if len(curr_seg):
             all_segments.append(curr_seg)
         return all_segments
-# ------------------------------ END OF BASIC CLASS DEFINITIONS ----------------------#######################
-
-
-def create_aim_segments(all_segments: list[list[HitObject]]) -> list[list[HitObject]]:
-    if not len(all_segments):
-        return all_segments
-    segments = [all_segments[0]]
-    if len(all_segments) == 2:
-        segments.append(all_segments[1])
-
-    i = 1
-    while i < len(all_segments) - 1:
-        prev = segments[-1]
-        curr = all_segments[i]
-        next_item = all_segments[i + 1]
-
-        if ((curr[0].pattern_type == "begin-stream" and len(curr) <= 7) or (curr[0].pattern_type == "irregular" and len(curr) <= 3)) and prev[0].pattern_type == "jump" and next_item[0].pattern_type == "jump":
-            prev.extend(curr)
-            prev.extend(next_item)
-            segments[-1] = prev
-            i += 2
-        else:
-            segments.append(curr)
-            if i == len(all_segments) - 2:
-                segments.append(all_segments[-1])
-                break
-            i += 1
-    return segments
-
-
-def calc_aim_diff(all_segments: list[list[HitObject]]) -> float:
-    segments = create_aim_segments(all_segments)
-    if not len(segments):
-        return 0
-    aim_stat = sum([len(seg)
-                   for seg in segments if seg[0].pattern_type == "jump"])
-    denom = aim_stat
-    num_hobjs = len([h for subl in all_segments for h in subl])
-    penalty = 0
-
-    for seg in segments:
-        # Penalties for long streams or irregular sections
-        if seg[0].pattern_type != "jump":
-            if 2 <= len(seg) <= 7:
-                penalty += len(seg) ** 1.2
-            elif 7 < len(seg) <= 15:
-                penalty += len(seg) ** 1.5
-            elif len(seg) > 15:
-                penalty += len(seg) ** 1.8
-        # penalties for consecutive stream or irregular sections
-        curr_idx = segments.index(seg)
-        if curr_idx != len(segments) - 1 and seg[0].pattern_type != "jump" and len(seg) > 2:
-            if segments[curr_idx + 1][0].pattern_type != "jump":
-                penalty += (len(seg) + len(segments[curr_idx + 1]))
-        # Reward long jump sections:
-        if seg[0].pattern_type == "jump":
-            if len([h for h in seg if h.pattern_type == "jump"])/len(seg) > 0.7 and len(seg) / num_hobjs > 0.05:
-                aim_stat += 5
-            elif len([h for h in seg if h.pattern_type == "jump"])/len(seg) > 0.7 and len(seg) / num_hobjs > 0.1:
-                aim_stat += 10
-
-    return 100 * aim_stat / (penalty + denom)
 
 
 class StreamStats:
     def __init__(self, avg_spacing, density):
         self.avg_spacing = avg_spacing
         self.density = density
+
+
+class RhythmStats:
+    def __init__(self, num_jump_secs, num_irr_secs, num_stream_secs, num_burst_secs, num_jump_objs, num_irr_objs, num_stream_objs, num_burst_objs):
+        self.num_jump_secs = num_jump_secs
+        self.num_irr_secs = num_irr_secs
+        self.num_stream_secs = num_stream_secs
+        self.num_burst_secs = num_burst_secs
+
+        self.num_jump_objs = num_jump_objs
+        self.num_irr_objs = num_irr_objs
+        self.num_stream_objs = num_stream_objs
+        self.num_burst_objs = num_burst_objs
+
+# ------------------------------ END OF BASIC CLASS DEFINITIONS ----------------------#######################
+
+
+def calc_rhythm_stats(all_segments: list[list[HitObject]]):
+    num_jump_secs = 0
+    num_irr_secs = 0
+    num_stream_secs = 0
+    num_burst_secs = 0
+
+    num_jump_objs = 0
+    num_irr_objs = 0
+    num_stream_objs = 0
+    num_burst_objs = 0
+
+    for sec in all_segments:
+        if len(set([a.pattern_type for a in sec])) == 3:
+            if len(sec) <= 5:
+                num_burst_secs += 1
+                num_burst_objs += len(sec)
+            else:
+                num_stream_secs += 1
+                num_stream_objs += len(sec)
+
+        elif "irregular" in set([a.pattern_type for a in sec]):
+            num_irr_secs += 1
+            num_irr_objs += len(sec)
+        elif "jump" in set([a.pattern_type for a in sec]):
+            num_jump_secs += 1
+            num_jump_objs += len(sec)
+
+    return RhythmStats(num_jump_secs, num_irr_secs, num_stream_secs, num_burst_secs, num_jump_objs, num_irr_objs, num_stream_objs, num_burst_objs)
 
 
 def calc_stream_stats(segments: list[list[HitObject]], cs: float) -> StreamStats:
@@ -468,7 +451,7 @@ def calc_stream_stats(segments: list[list[HitObject]], cs: float) -> StreamStats
     total = 0
     for seg in segments:
         total += len(seg)
-        if seg[0].pattern_type == "begin-stream":
+        if len(set([a.pattern_type for a in seg])) == 3:
             seg_spacing = []
             denom += len(seg)
             for i in range(1, len(seg)):
@@ -493,8 +476,8 @@ def create_stats_entry(fpath: str, lazer: bool = False):
         else:
             parsed_bm.get_patterns()
             all_segments = parsed_bm.get_pattern_sections()
-            aim = calc_aim_diff(all_segments)
             ss = calc_stream_stats(all_segments, parsed_bm.cs)
+            rstats = calc_rhythm_stats(all_segments)
             # calculate star rating and 100% pp
             rosu_bm = rosu_pp_py.Beatmap(path=fpath)
             pp_100 = 0
@@ -534,14 +517,44 @@ def create_stats_entry(fpath: str, lazer: bool = False):
                 url = f"https://osu.ppy.sh/beatmapsets?q={enc}"
                 bg_url = "assets/bg_placeholder.png"
             # end
+            avg_irr_length = rstats.num_irr_objs / \
+                rstats.num_irr_secs if rstats.num_irr_secs > 0 else 0
+            avg_num_jumps = rstats.num_jump_objs / \
+                rstats.num_jump_secs if rstats.num_jump_secs > 0 else 0
+            avg_burst_length = rstats.num_burst_objs / \
+                rstats.num_burst_secs if rstats.num_burst_secs > 0 else 0
+            overall_irr = 100 * (rstats.num_irr_objs / len(parsed_bm.hit_objects) if len(
+                parsed_bm.hit_objects) > 0 else 0)
+
+            is_regular = True if overall_irr <= 7.27 else False
+
+            is_jump = False
+            if is_regular and avg_num_jumps > 10 and rstats.num_stream_secs == 0 and rstats.num_jump_secs > rstats.num_burst_secs:
+                is_jump = True
+
+            is_stream = False
+            if is_regular and rstats.num_stream_secs > 0 and ss.density >= 0.25 and ss.avg_spacing <= 0.727:
+                is_stream = True
+
             return {
-                "aim": aim,
+                "avg_num_jumps": avg_num_jumps,
+                "avg_stream_length": rstats.num_stream_objs / rstats.num_stream_secs if rstats.num_stream_secs > 0 else 0,
+                "avg_burst_length": avg_burst_length,
+                "avg_irr_length": avg_irr_length,
+                "overall_irr_percent": overall_irr,
+                "num_jump_secs": rstats.num_jump_secs,
+                "num_stream_secs": rstats.num_stream_secs,
+                "num_burst_secs": rstats.num_burst_secs,
+                "num_irr_secs": rstats.num_irr_secs,
+                "is_regular": is_regular,
+                "is_jump": is_jump,
+                "is_stream": is_stream,
                 "stream-density": ss.density,
                 "stream-spacing": ss.avg_spacing,
                 "ar": parsed_bm.AR,
                 "bpm": parsed_bm.dominant_bpm,
                 "id": parsed_bm.beatmapID,
-                "beatmapset_id": parsed_bm.beatmapID,
+                "beatmapset_id": parsed_bm.beatmapsetID,
                 "title": parsed_bm.title,
                 "artist": parsed_bm.artist,
                 "creator": parsed_bm.creator,
