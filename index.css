@@ -312,3 +312,6 @@ body {
   margin-bottom: 300px;
   display: none;
 }
+code {
+  white-space: nowrap;
+}
