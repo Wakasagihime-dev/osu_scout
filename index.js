@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     streamPresetBtn: document.getElementById("stream-preset"),
     loading: document.getElementById("loading"),
     share: document.getElementById("share"),
+    clearAll: document.getElementById("clear-all"),
   };
   const presetFields = {
     arInp: document.getElementById("ar"),
@@ -141,6 +142,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   });
   // [/SHARE]
+  // [CLEAR ALL FIELDS]
+  el.clearAll.addEventListener("click", (e) => {
+    document.querySelectorAll('input[type="text"]').forEach((inp) => {
+      inp.value = "";
+    });
+  });
+  // [/CLEAR ALL FIELDS]
 });
 
 /***  [UTILS]  ***/
