@@ -4,3 +4,5 @@
 
 ![website preview](./assets/site-preview.png)
 ![website preview](./assets/preview-2.png)
+
+_pls enjoy game_
